@@ -13,6 +13,7 @@ connectDB();
 
 const importData = async () => {
   try {
+    await Order.deleteMany();
     await Product.deleteMany();
     await User.deleteMany();
 
@@ -36,8 +37,10 @@ const importData = async () => {
 
 const destroyData = async () => {
   try {
+    await Order.deleteMany();
     await Product.deleteMany();
     await User.deleteMany();
+
     console.log("Data destroyed !".red.inverse);
     process.exit();
   } catch (error) {
