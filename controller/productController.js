@@ -16,4 +16,95 @@ const getProductById = asyncHandler(async (req, res) => {
   }
 });
 
-export { getProducts, getProductById };
+const deleteProductById = asyncHandler(async (req, res) => {
+  const product = await Product.findById(req.params.id);
+
+  if (product) {
+    const deleteProduct = await Product.findByIdAndDelete({
+      _id: req.params.id,
+    });
+    if (deleteProduct) {
+      res.status(200).json({
+        message: "Product deleted successfully",
+        product: deleteProduct,
+      });
+    } else {
+      res.status(500).json("couldn't delete product");
+    }
+  } else {
+    res.status(404).json({ message: "Product not found" });
+  }
+  
+});
+
+const addProduct = asyncHandler(async (req, res) => { 
+  const { name, price, image, category, description, brand, countInStock } =
+    req.body;
+  console.log("inside add products");
+  const products = new Product({
+    name,
+    price,
+    image,
+    category,
+    description,
+    brand,
+    countInStock,
+  });
+
+  console.log(req.body, "req body add req",products,'products from add request');
+  const createdProduct = await products.save();
+  res.status(201).json(createdProduct);
+  console.log(createdProduct,"response getting from add request")
+});
+
+
+// @desc update product
+//@route PUT /api/product/:id
+//@access Private
+
+const putUpdateProduct = asyncHandler(async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+
+    if (product) {
+      const updates = Object.keys(req.body);
+      const allowedUpdates = [
+        "user",
+        "name",
+        "image",
+        "brand",
+        "category",
+        "description",
+        "reviews",
+        "rating",
+        "numReviews",
+        "price",
+        "countInStock",
+        "addedInCart",
+        "addedQtyInCart",
+      ];
+      const isValidOperation = updates.every((update) => {
+        return allowedUpdates.includes(update);
+      });
+      if (!isValidOperation) {
+        return res
+          .status(400)
+          .json({ status: "fail", message: "Invalid updates" });
+      }
+      updates.forEach((update) => (product[update] = req.body[update]));
+      await product.save();
+
+      res.status(200).json({ message: "Product update successfully", product });
+    } else {
+      res.status(404).json({ message: "Product not found" });
+    }
+  } catch (error) {
+    res.status(400).json({ message: "Product update failed", error });
+  }
+});
+
+export { getProducts, getProductById, deleteProductById, addProduct, putUpdateProduct };
+
+
+
+
