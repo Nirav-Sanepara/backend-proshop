@@ -34,10 +34,13 @@ const deleteProductById = asyncHandler(async (req, res) => {
   } else {
     res.status(404).json({ message: "Product not found" });
   }
-  
 });
 
-const addProduct = asyncHandler(async (req, res) => { 
+// @desc add product
+//@route POST /api/product/:id
+//@access Private
+
+const addProduct = asyncHandler(async (req, res) => {
   const { name, price, image, category, description, brand, countInStock } =
     req.body;
   console.log("inside add products");
@@ -51,12 +54,16 @@ const addProduct = asyncHandler(async (req, res) => {
     countInStock,
   });
 
-  console.log(req.body, "req body add req",products,'products from add request');
+  console.log(
+    req.body,
+    "req body add req",
+    products,
+    "products from add request"
+  );
   const createdProduct = await products.save();
   res.status(201).json(createdProduct);
-  console.log(createdProduct,"response getting from add request")
+  console.log(createdProduct, "response getting from add request");
 });
-
 
 // @desc update product
 //@route PUT /api/product/:id
@@ -103,8 +110,10 @@ const putUpdateProduct = asyncHandler(async (req, res) => {
   }
 });
 
-export { getProducts, getProductById, deleteProductById, addProduct, putUpdateProduct };
-
-
-
-
+export {
+  getProducts,
+  getProductById,
+  deleteProductById,
+  addProduct,
+  putUpdateProduct,
+};
