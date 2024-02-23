@@ -96,20 +96,19 @@ const registerUserActive = asyncHandler(async (req, res) => {
   }
   else if (!userExists) {
 
-    console.log('inside signup request', req.body);
-
+    
 
     //User.create() is similar as User.save()
 
-    const user = await User({
+    const user = await User.create({
       name,
       email,
       password,
       isActive: true,
       userId: req._id
     });
-    await User.save();
-    console.log(user, 'user signup');
+    
+    
     if (user) {
       const token = generateToken(user._id)
       console.log('token get ---- ', token);
@@ -202,16 +201,16 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 //@get All user details api
 
 const allUserDataGetting = asyncHandler(async (req, res) => {
-  console.log('inside get user req');
+  
   try {
     let results = await User.find({})
-    console.log(results, 'results');
+   
     res.json(results)
   }
   catch (err) {
-    console.log(err, 'errrrrrrrrrrrrrrrrrrrrr');
+   res.json({message:"Something went wrong"})
   }
-  console.log('outside catch error handler');
+  
 })
 
 export { authUser, registerUser, getUserProfile, updateUserProfile, registerUserActive, userProfileSoftDelete, allUserDataGetting };
