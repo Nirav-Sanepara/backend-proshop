@@ -4,9 +4,11 @@ const { Schema } = mongoose;
 
 const userSchema = new Schema(
   {
+
     name: {
       type: String,
       required: true,
+      unique: true,
     },
     email: {
       type: String,
@@ -17,11 +19,21 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
-    isAdmin: {
-      type: Boolean,
-      required: true,
-      default: false,
+    role: {
+      type: String,
+      enum: ['admin', 'merchant', 'customer'],
+      default: 'user',
     },
+    // Additional fields specific to the Merchant schema
+    storeName: {
+      type: String,
+      required: false,
+    },
+    isActive : {
+      type : Boolean,
+      default : false
+    }
+    
   },
   {
     timestamps: true,

@@ -1,5 +1,6 @@
 import asyncHandler from "express-async-handler";
 import Order from "../models/orderModel.js";
+import User from "../models/userModel.js";
 
 // @desc Create new order
 //@route POST /api/orders
@@ -7,6 +8,7 @@ import Order from "../models/orderModel.js";
 
 const addOrderItems = asyncHandler(async (req, res) => {
   console.log("req.body", req.body);
+  const userExists=await User.findById({_id:req.user?._id,})
   const {
     orderItems,
     shippingAddress,
@@ -20,7 +22,7 @@ const addOrderItems = asyncHandler(async (req, res) => {
   if (orderItems && orderItems.length === 0) {
     res.status(400);
     throw new Error("No order items");
-  } else {
+  } else if(userExists.isActive==true) {
     console.log(orderItems, "items");
     const order = new Order({
       orderItems,
@@ -36,6 +38,9 @@ const addOrderItems = asyncHandler(async (req, res) => {
     console.log(order, "after order controller");
     res.status(201).json(orderCreated);
   }
+  else{
+    res.json({message:"Something went wrong please try again later or signup again"});
+  }
 });
 
 //@desc get order
@@ -43,11 +48,12 @@ const addOrderItems = asyncHandler(async (req, res) => {
 //@access Private
 
 const getOrderById = asyncHandler(async (req, res) => {
+  const userExists=await User.findById({_id:req.user?._id,})
   const order = await Order.findById(req.params.id).populate(
     "user",
     "name email"
   );
-  if (order) {
+  if (order && userExists.isActive==true) {
     res.json(order);
   } else {
     console.log("errrrrr");

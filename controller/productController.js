@@ -8,7 +8,7 @@ const getProducts = asyncHandler(async (req, res) => {
 
 const getProductById = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id);
-
+console.log(product,'products');
   if (product) {
     res.json(product);
   } else {

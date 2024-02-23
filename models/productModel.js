@@ -16,7 +16,7 @@ const productSchema = new Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      required: false,
+      required: true,
       ref: "User",
     },
     name: {
@@ -25,7 +25,7 @@ const productSchema = new Schema(
     },
     image: {
       type: String,
-      required: false,
+      required: true,
     },
     brand: {
       type: String,
@@ -37,17 +37,17 @@ const productSchema = new Schema(
     },
     description: {
       type: String,
-      required: false,
+      required: true,
     },
     reviews: [reviewSchema],
     rating: {
       type: Number,
-      required: false,
+      
       default: 0,
     },
     numReviews: {
       type: Number,
-      required: false,
+      required: true,
       default: 0,
     },
     price: {
@@ -57,7 +57,7 @@ const productSchema = new Schema(
     },
     countInStock: {
       type: Number,
-      required: false,
+      required: true,
       default: 0,
     },
     addedInCart: {
