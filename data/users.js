@@ -5,8 +5,8 @@ const users = [
     name: "nirav",
     email: "nirav@gmail.com",
     password: bcrypt.hashSync("123456", 10),
-    isAdmin: true,
-    isActive: false,
+    
+    isActive: true,
   },
   {
     name: "nirav2",
@@ -24,8 +24,9 @@ const users = [
     name: "nirav4",
     email: "nirav4@gmail.com",
     password: bcrypt.hashSync("123456", 10),
-    isActive: false,
+    isActive: true,
   },
 ];
 
 export default users;
+

@@ -21,14 +21,11 @@ const userSchema = new Schema(
     },
     role: {
       type: String,
-      enum: ['admin', 'merchant', 'customer'],
+      enum: ['admin', 'merchant', 'user'],
       default: 'user',
     },
     // Additional fields specific to the Merchant schema
-    storeName: {
-      type: String,
-      required: false,
-    },
+    
     isActive : {
       type : Boolean,
       default : false

@@ -136,15 +136,19 @@ const registerUserActive = asyncHandler(async (req, res) => {
 const userProfileSoftDelete = asyncHandler(async (req, res) => {
 
   // const isExists = await User.find({ _id:req.params._id })
+  console.log('inside soft delete');
+  
   const user = await User.findByIdAndUpdate({ _id: req.params.id }, { ...req.body, isActive: false })
+  console.log(user,'user data that going to delete');
   try {
     if (user) {
+       
       res.status(200).json({ message: 'Account deleted Successfully' })
     }
   }
   catch (err) {
     res.status(404)
-      .json('user data not found')
+      .json({message:'user data not found',err})
   }
 })
 
@@ -193,8 +197,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       isAdmin: updateUser.isAdmin,
     });
   } else {
-    res.status(404);
-    throw new Error("User not found");
+    res.status(404).json({message: "User not found"});
   }
 });
 
@@ -204,6 +207,14 @@ const allUserDataGetting = asyncHandler(async (req, res) => {
   
   try {
     let results = await User.find({})
+    // const filteredUser=results.filter((item,index)=>{
+    //   if(item.isActive==true){
+    //     return true
+    //   }
+    //   else{
+    //     return false
+    //   }
+    // })
    
     res.json(results)
   }
@@ -212,6 +223,7 @@ const allUserDataGetting = asyncHandler(async (req, res) => {
   }
   
 })
+
 
 export { authUser, registerUser, getUserProfile, updateUserProfile, registerUserActive, userProfileSoftDelete, allUserDataGetting };
 

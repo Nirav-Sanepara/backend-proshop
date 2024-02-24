@@ -14,7 +14,7 @@ const router = express.Router();
 router.route("/").post(registerUserActive);
 router.post("/login", authUser);
 //router.patch('/:_id',protect,registerUserActive) //change done
-router.patch('/:id',protect,userProfileSoftDelete) //change done
+router.put('/:id',protect,userProfileSoftDelete) //change done
 router
   .route("/profile")
   .get(protect, getUserProfile)
