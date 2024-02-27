@@ -26,6 +26,12 @@ const users = [
     password: bcrypt.hashSync("123456", 10),
     isActive: true,
   },
+  {
+    name: "SuperAdmin",
+    email: "admin@gamil.com",
+    password: bcrypt.hashSync("123", 10),
+    isActive: true,
+  }
 ];
 
 export default users;

@@ -22,8 +22,8 @@ const authUser = asyncHandler(async (req, res) => {
       token: generateToken(user._id),
     });
   } else {
-    res.status(401);
-    throw new Error("Invalid Email or Password");
+    res.status(401).send({ message: "Invalid Email or Password" });
+    // throw new Error("Invalid Email or Password");
   }
 });
 
@@ -38,8 +38,8 @@ const registerUser = asyncHandler(async (req, res) => {
 
   console.log('userExists checking', userExists);
   if (userExists && userExists.isActive == true) {
-    res.status(404);
-    throw new Error("User already exists");
+    res.status(404).json({message:"User already exists"});
+   // throw new Error("User already exists");
   }
 
   //User.create() is similar as User.save()
@@ -96,7 +96,7 @@ const registerUserActive = asyncHandler(async (req, res) => {
   }
   else if (!userExists) {
 
-    
+
 
     //User.create() is similar as User.save()
 
@@ -107,8 +107,8 @@ const registerUserActive = asyncHandler(async (req, res) => {
       isActive: true,
       userId: req._id
     });
-    
-    
+
+
     if (user) {
       const token = generateToken(user._id)
       console.log('token get ---- ', token);
@@ -120,8 +120,8 @@ const registerUserActive = asyncHandler(async (req, res) => {
         token: generateToken(user._id),
       });
     } else {
-      res.status(400);
-      throw new Error("Invalid user data");
+      res.status(400).send({ message: "Invalid user data" });
+
     }
 
   }
@@ -137,18 +137,18 @@ const userProfileSoftDelete = asyncHandler(async (req, res) => {
 
   // const isExists = await User.find({ _id:req.params._id })
   console.log('inside soft delete');
-  
+
   const user = await User.findByIdAndUpdate({ _id: req.params.id }, { ...req.body, isActive: false })
-  console.log(user,'user data that going to delete');
+  console.log(user, 'user data that going to delete');
   try {
     if (user) {
-       
+
       res.status(200).json({ message: 'Account deleted Successfully' })
     }
   }
   catch (err) {
     res.status(404)
-      .json({message:'user data not found',err})
+      .json({ message: 'user data not found', err })
   }
 })
 
@@ -197,14 +197,14 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       isAdmin: updateUser.isAdmin,
     });
   } else {
-    res.status(404).json({message: "User not found"});
+    res.status(404).json({ message: "User not found" });
   }
 });
 
 //@get All user details api
 
 const allUserDataGetting = asyncHandler(async (req, res) => {
-  
+
   try {
     let results = await User.find({})
     // const filteredUser=results.filter((item,index)=>{
@@ -215,13 +215,13 @@ const allUserDataGetting = asyncHandler(async (req, res) => {
     //     return false
     //   }
     // })
-   
+
     res.json(results)
   }
   catch (err) {
-   res.json({message:"Something went wrong"})
+    res.json({ message: "Something went wrong" })
   }
-  
+
 })
 
 
