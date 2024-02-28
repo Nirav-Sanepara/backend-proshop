@@ -38,8 +38,8 @@ const registerUser = asyncHandler(async (req, res) => {
 
   console.log('userExists checking', userExists);
   if (userExists && userExists.isActive == true) {
-    res.status(404).json({message:"User already exists"});
-   // throw new Error("User already exists");
+    res.status(404).json({ message: "User already exists" });
+    // throw new Error("User already exists");
   }
 
   //User.create() is similar as User.save()
@@ -207,15 +207,7 @@ const allUserDataGetting = asyncHandler(async (req, res) => {
 
   try {
     let results = await User.find({})
-    // const filteredUser=results.filter((item,index)=>{
-    //   if(item.isActive==true){
-    //     return true
-    //   }
-    //   else{
-    //     return false
-    //   }
-    // })
-
+    
     res.json(results)
   }
   catch (err) {
@@ -223,7 +215,119 @@ const allUserDataGetting = asyncHandler(async (req, res) => {
   }
 
 })
+// cart handling apis
+// @ add to cart with user model
+//private
 
+const addToCart = asyncHandler(async (req, res) => {
+  const { userId, productId, quantity } = req.body;
 
-export { authUser, registerUser, getUserProfile, updateUserProfile, registerUserActive, userProfileSoftDelete, allUserDataGetting };
+  // Validate quantity
+  if (quantity < 1) {
+    return res.status(400).json('Quantity must be at least 1');
+  }
+
+  try {
+    await User.findByIdAndUpdate(userId, { $addToSet: { cartItems: { productId, quantity } } });
+    res.status(200).json('Product added to cart successfully');
+  } catch (error) {
+    console.error(error);
+    res.status(500).json('Internal server error',error);
+  }
+});
+//@remove from cart
+//private
+const removeFromCart = asyncHandler(async (req, res) => {
+  const { userId, productId } = req.body;
+  try {
+    await User.findByIdAndUpdate(userId, { $pull: { cartItems: { productId } } });
+    res.status(200).json('Product removed from cart successfully');
+  } catch (error) {
+    console.error(error);
+    res.status(500).json('Internal server error');
+  }
+})
+
+// @ cart items get request
+// private
+const displayCartItems = asyncHandler(async (req,res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (user) {
+      const cartItems = user.cartItems;
+      console.log(cartItems);
+      res.status(200).json(cartItems)
+    } else {
+      console.log('User not found');
+    }
+  } catch (error) {
+    res.status(500).json('Internal server error')
+    console.error(error);
+  }
+})
+
+// favourite items handling api
+
+//@fav items add request
+//private
+
+const favouriteItemAdd = asyncHandler(async(req,res)=>{
+  const {productId, userId}=req.body;
+  try {
+    await User.findByIdAndUpdate(userId, { $addToSet: { favoriteProducts: { productId } } });
+    res.status(200).json('Product added to favourite list successfully');
+  } catch (error) {
+    console.error(error);
+    res.status(500).json('Internal server error',error);
+  }
+})
+
+//@fav item remove req
+//private
+
+const favouriteItemRemove = asyncHandler(async(req,res)=>{
+  const { userId, productId } = req.body;
+  try {
+    await User.findByIdAndUpdate(userId, { $pull: { favoriteProducts: { productId } } });
+    res.status(200).json('Product removed from cart successfully');
+  } catch (error) {
+    console.error(error);
+    res.status(500).json('Internal server error');
+  }
+})
+
+//@fav items display list items
+//private
+
+const displayFavouriteItems=asyncHandler(async(req,res)=>{
+  try {
+    const user = await User.findById(req.user._id);
+    if (user) {
+      const cartItems = user.favoriteProducts;
+      console.log(cartItems);
+      res.status(200).json(cartItems)
+    } else {
+      console.log('User not found');
+    }
+  } catch (error) {
+    res.status(500).json('Internal server error')
+    console.error(error);
+  }
+})
+
+export {
+  authUser,
+  registerUser,
+  getUserProfile,
+  updateUserProfile,
+  registerUserActive,
+  userProfileSoftDelete,
+  allUserDataGetting,
+  addToCart,
+  removeFromCart,
+  displayCartItems,
+  displayFavouriteItems,
+  favouriteItemAdd,
+  favouriteItemRemove
+};
 

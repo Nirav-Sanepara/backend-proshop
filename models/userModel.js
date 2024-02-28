@@ -80,7 +80,15 @@ const userSchema = new Schema(
       default: 'user',
     },
     // Additional fields specific to the Merchant schema
-    
+    favoriteProducts: [{
+      productId: { type: Schema.Types.ObjectId },
+      // Other product information like name, price, etc. can also be stored here
+    }],
+    cartItems: [{
+      productId: { type: Schema.Types.ObjectId },
+      quantity: Number,
+      // Other product information like name, price, etc. can also be stored here
+    }],
     isActive : {
       type : Boolean,
       default : false
