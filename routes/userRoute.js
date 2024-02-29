@@ -29,8 +29,8 @@ router.post('/addTofavourite',protect,favouriteItemAdd)
 router.post('/removeFav',protect,favouriteItemRemove)
 router
   .route("/profile")
-  .get(protect, getUserProfile)
-  .put(protect, updateUserProfile);
+  .get(protect, getUserProfile);
+ router.put('/profile',updateUserProfile) 
 
   router.route("/usersdata").get(allUserDataGetting)
 

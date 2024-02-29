@@ -1,7 +1,7 @@
 import asyncHandler from "express-async-handler";
 import User from "../models/userModel.js";
 import generateToken from "../utils/generateToken.js";
-
+import Product from '../models/productModel.js'
 // @desc Auth user and get token
 //@route POST /api/users/login
 //@access Public
@@ -18,7 +18,7 @@ const authUser = asyncHandler(async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
-      isAdmin: user.isAdmin,
+      role: user.role,
       token: generateToken(user._id),
     });
   } else {
@@ -74,7 +74,7 @@ const registerUser = asyncHandler(async (req, res) => {
 //@access Public
 
 const registerUserActive = asyncHandler(async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, role } = req.body;
 
   const userExists = await User.findOne({ email });
 
@@ -105,18 +105,20 @@ const registerUserActive = asyncHandler(async (req, res) => {
       email,
       password,
       isActive: true,
-      userId: req._id
+      userId: req._id,
+      role
     });
 
 
     if (user) {
       const token = generateToken(user._id)
-      console.log('token get ---- ', token);
+      console.log('token gen ---- ', token);
       res.status(201).json({
         _id: user._id,
         name: user.name,
         email: user.email,
         isActive: user.isActive,
+        role:user.role,
         token: generateToken(user._id),
       });
     } else {
@@ -128,6 +130,22 @@ const registerUserActive = asyncHandler(async (req, res) => {
   else {
     res.json({ message: "Something went wrong please try again later" })
   }
+
+
+  // try{
+  //   const  userdata=await User.find();
+  //   const x=userdata.filter((ele)=>{
+  //     ele.role='user'
+  //   })
+  //   if(x){
+  //    await x.save()
+  //    res.json({message:"added user", x})
+
+  //   }
+  // }
+  // catch(error){
+  //   res.json({message:"something went wrong", error})
+  // }
 
 });
 
@@ -179,7 +197,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
 // @access Private
 
 const updateUserProfile = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.user._id);
+  const user = await User.findById(req.params.id);
 
   if (user) {
     user.name = req.body.name || user.name;
@@ -202,12 +220,12 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 });
 
 //@get All user details api
-
+//admin can handle
 const allUserDataGetting = asyncHandler(async (req, res) => {
 
   try {
     let results = await User.find({})
-    
+
     res.json(results)
   }
   catch (err) {
@@ -215,6 +233,7 @@ const allUserDataGetting = asyncHandler(async (req, res) => {
   }
 
 })
+
 // cart handling apis
 // @ add to cart with user model
 //private
@@ -222,46 +241,71 @@ const allUserDataGetting = asyncHandler(async (req, res) => {
 const addToCart = asyncHandler(async (req, res) => {
   const { userId, productId, quantity } = req.body;
 
-  // Validate quantity
-  if (quantity < 1) {
-    return res.status(400).json('Quantity must be at least 1');
+  if (!userId || !productId || !quantity) {
+    return res
+      .status(400)
+      .json({ error: "UserId, productId, and quantity are required" });
   }
-
+  if (quantity < 1) {
+    return res.status(400).json({ error: "Quantity must be at least 1" });
+  }
   try {
-    await User.findByIdAndUpdate(userId, { $addToSet: { cartItems: { productId, quantity } } });
-    res.status(200).json('Product added to cart successfully');
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+    const cartItem = {
+      product: product,
+      quantity: quantity,
+    };
+    // console.log(cartItem,"1111111111111111111111111111111111111111")
+    await User.findByIdAndUpdate(userId, {
+      $addToSet: { cartItems: cartItem },
+    });
+    res
+      .status(200)
+      .json({ message: "Product added to cart successfully", product });
   } catch (error) {
     console.error(error);
-    res.status(500).json('Internal server error',error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
+
 //@remove from cart
 //private
 const removeFromCart = asyncHandler(async (req, res) => {
   const { userId, productId } = req.body;
   try {
-    await User.findByIdAndUpdate(userId, { $pull: { cartItems: { productId } } });
-    res.status(200).json('Product removed from cart successfully');
+    const product = await Product.findById(productId);
+    const cartItem = {
+      product: productId,
+    };
+    // console.log("product", product);
+    await User.findByIdAndUpdate(userId, { $pull: { cartItems: cartItem } });
+    res.status(200).json("Product removed from cart successfully");
   } catch (error) {
     console.error(error);
-    res.status(500).json('Internal server error');
+    res.status(500).json("Internal server error");
   }
 })
 
 // @ cart items get request
 // private
-const displayCartItems = asyncHandler(async (req,res) => {
+const displayCartItems = asyncHandler(async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
+    const user = await User.findById(req.user._id).populate(
+      "cartItems.product"
+    );
+
     if (user) {
       const cartItems = user.cartItems;
-      console.log(cartItems);
-      res.status(200).json(cartItems)
+
+      res.status(200).json(cartItems);
     } else {
-      console.log('User not found');
+      console.log("User not found");
     }
   } catch (error) {
-    res.status(500).json('Internal server error')
+    res.status(500).json("Internal server error");
     console.error(error);
   }
 })
@@ -271,21 +315,30 @@ const displayCartItems = asyncHandler(async (req,res) => {
 //@fav items add request
 //private
 
-const favouriteItemAdd = asyncHandler(async(req,res)=>{
-  const {productId, userId}=req.body;
+const favouriteItemAdd = asyncHandler(async (req, res) => {
+  const { productId, userId } = req.body;
+  const product = await Product.findById(productId)
   try {
-    await User.findByIdAndUpdate(userId, { $addToSet: { favoriteProducts: { productId } } });
-    res.status(200).json('Product added to favourite list successfully');
+ const favourite= {
+
+ }
+    if (product) {
+      await User.findByIdAndUpdate(userId, { $addToSet: { favoriteProducts: product } });
+      res.status(200).json('Product added to favourite item in list successfully');
+    }
+    else {
+      res.json({ message: "Product not found" })
+    }
   } catch (error) {
     console.error(error);
-    res.status(500).json('Internal server error',error);
+    res.status(500).json('Internal server error', error);
   }
 })
 
 //@fav item remove req
 //private
 
-const favouriteItemRemove = asyncHandler(async(req,res)=>{
+const favouriteItemRemove = asyncHandler(async (req, res) => {
   const { userId, productId } = req.body;
   try {
     await User.findByIdAndUpdate(userId, { $pull: { favoriteProducts: { productId } } });
@@ -299,7 +352,7 @@ const favouriteItemRemove = asyncHandler(async(req,res)=>{
 //@fav items display list items
 //private
 
-const displayFavouriteItems=asyncHandler(async(req,res)=>{
+const displayFavouriteItems = asyncHandler(async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
     if (user) {

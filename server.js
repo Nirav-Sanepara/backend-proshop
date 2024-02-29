@@ -23,7 +23,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/orders", orderRoutes);
 
 // app.use(notFound);
-// app.use(errHandler);
+// app.use(errHandler);  api/'products/myproducts
 //http://localhost:3001/api/users/usersdata
 const PORT = process.env.PORT || 5000;
 

@@ -110,10 +110,27 @@ const putUpdateProduct = asyncHandler(async (req, res) => {
   }
 });
 
+//@merchant role purpose
+//All product that created by one user
+//private
+
+// StoryControler.get("/mystory",async(req,res)=>{
+//   const mystory=await PostModel.find({customerId:req.body.customerId})
+//   console.log(mystory)
+//   res.json(mystory)
+// })
+
+const createdProductByUserId= asyncHandler(async(req,res)=>{
+  const results = await Product.find({user:req.body.user._id})
+  console.log(results,'results');
+  res.json(results)
+})
+
 export {
   getProducts,
   getProductById,
   deleteProductById,
   addProduct,
   putUpdateProduct,
+  createdProductByUserId
 };
