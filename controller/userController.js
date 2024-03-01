@@ -254,14 +254,35 @@ const addToCart = asyncHandler(async (req, res) => {
     if (!product) {
       return res.status(404).json({ error: "Product not found" });
     }
-    const cartItem = {
-      product: product,
-      quantity: quantity,
-    };
-    // console.log(cartItem,"1111111111111111111111111111111111111111")
-    await User.findByIdAndUpdate(userId, {
-      $addToSet: { cartItems: cartItem },
+
+    const existingCartItem = await User.findOne({
+      _id: userId,
+      'cartItems.product': productId,
     });
+
+    if (existingCartItem) {
+      // If the product already exists in the cart, update the quantity
+      await User.updateOne(
+        {
+          _id: userId,
+          'cartItems.product': productId,
+        },
+        {
+          $inc: { 'cartItems.$.quantity': quantity },
+        }
+      );
+    } else {
+      // If the product is not in the cart, add it as a new item
+      const cartItem = {
+        product: product,
+        quantity: quantity,
+      };
+
+      await User.findByIdAndUpdate(userId, {
+        $addToSet: { cartItems: cartItem },
+      });
+    }
+
     res
       .status(200)
       .json({ message: "Product added to cart successfully", product });
@@ -314,7 +335,7 @@ const displayCartItems = asyncHandler(async (req, res) => {
 // private
 const updateCartItemQuantity = asyncHandler(async (req, res) => {
   const { userId, productId, newQuantity } = req.body;
-
+  
   if (!userId || !productId || !newQuantity) {
     return res
       .status(400)

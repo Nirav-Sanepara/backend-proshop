@@ -50,17 +50,6 @@ const productSchema = new Schema(
       required: false,
       default: 0,
     },
-    addedInCart: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    addedQtyInCart: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
-
     price: {
       type: Number,
       required: false,
