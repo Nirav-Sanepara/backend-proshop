@@ -16,51 +16,62 @@ const productSchema = new Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      required: true,
+      required: false,
       ref: "User",
     },
     name: {
       type: String,
-      required: true,
+      required: false,
     },
     image: {
       type: String,
-      required: true,
+      required: false,
     },
     brand: {
       type: String,
-      required: true,
+      required: false,
     },
     category: {
       type: String,
-      required: true,
+      required: false,
     },
     description: {
       type: String,
-      required: true,
+      required: false,
     },
     reviews: [reviewSchema],
     rating: {
       type: Number,
-      
+
       default: 0,
     },
     numReviews: {
       type: Number,
-      required: true,
+      required: false,
       default: 0,
     },
+    addedInCart: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    addedQtyInCart: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
+
     price: {
       type: Number,
-      required: true,
+      required: false,
       default: 0,
     },
     countInStock: {
       type: Number,
-      required: true,
+      required: false,
       default: 0,
     },
-    
+
   },
   {
     timestamps: true,
@@ -70,4 +81,3 @@ const productSchema = new Schema(
 const Product = mongoose.model("Product", productSchema);
 
 export default Product;
-   
