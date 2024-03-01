@@ -310,6 +310,49 @@ const displayCartItems = asyncHandler(async (req, res) => {
   }
 })
 
+// update quantity api
+// private
+const updateCartItemQuantity = asyncHandler(async (req, res) => {
+  const { userId, productId, newQuantity } = req.body;
+
+  if (!userId || !productId || !newQuantity) {
+    return res
+      .status(400)
+      .json({ error: "UserId, productId, and newQuantity are required" });
+  }
+  if (newQuantity < 1) {
+    return res.status(400).json({ error: "New quantity must be at least 1" });
+  }
+
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const cartItemIndex = user.cartItems.findIndex(
+      (item) => item.product.toString() === productId
+    );
+
+    if (cartItemIndex === -1) {
+      return res.status(404).json({ error: "Product not found in the cart" });
+    }
+
+    const updatedCartItems = [...user.cartItems];
+    updatedCartItems[cartItemIndex].quantity = newQuantity;
+
+    await User.findByIdAndUpdate(userId, {
+      cartItems: updatedCartItems,
+    });
+
+    res.status(200).json({ message: "Quantity updated successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // favourite items handling api
 
 //@fav items add request
@@ -320,10 +363,10 @@ const favouriteItemAdd = asyncHandler(async (req, res) => {
   const product = await Product.findById(productId)
   try {
  const favourite= {
-
+         product
  }
     if (product) {
-      await User.findByIdAndUpdate(userId, { $addToSet: { favoriteProducts: product } });
+      await User.findByIdAndUpdate(userId, { $addToSet: { favoriteProducts: favourite } });
       res.status(200).json('Product added to favourite item in list successfully');
     }
     else {
@@ -381,6 +424,7 @@ export {
   displayCartItems,
   displayFavouriteItems,
   favouriteItemAdd,
-  favouriteItemRemove
+  favouriteItemRemove,
+  updateCartItemQuantity
 };
 

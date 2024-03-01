@@ -12,7 +12,8 @@ import {
   displayCartItems,
   displayFavouriteItems,
   favouriteItemAdd,
-  favouriteItemRemove
+  favouriteItemRemove,
+  updateCartItemQuantity
 } from "../controller/userController.js";
 import { protect } from "../middleware/authMiddleware.js";
 const router = express.Router();
@@ -27,6 +28,7 @@ router.post('/addTocart',protect,addToCart)
 router.post('/removecart',protect,removeFromCart)
 router.post('/addTofavourite',protect,favouriteItemAdd)
 router.post('/removeFav',protect,favouriteItemRemove)
+router.put('/updateCartItemQuantity', updateCartItemQuantity)
 router
   .route("/profile")
   .get(protect, getUserProfile);

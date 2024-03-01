@@ -60,16 +60,7 @@ const productSchema = new Schema(
       required: true,
       default: 0,
     },
-    addedInCart: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    addedQtyInCart: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
+    
   },
   {
     timestamps: true,
