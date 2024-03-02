@@ -3,6 +3,9 @@ import Product from "../models/productModel.js";
 
 const getProducts = asyncHandler(async (req, res) => {
   const products = await Product.find({});
+  products.map((prd) => {
+    prd["isFavourite"] = favoriteProducts?.incluides( prd._id) ? true : false;
+  })
   res.json(products);
 });
 

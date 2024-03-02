@@ -58,7 +58,7 @@ const registerUser = asyncHandler(async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
-        isAdmin: user.isAdmin,
+        role:user.role,
         token: generateToken(user._id),
       });
     } else {
@@ -184,7 +184,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
-      isAdmin: user.isAdmin,
+      
     });
   } else {
     res.status(404);
@@ -212,7 +212,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       _id: updateUser._id,
       name: updateUser.name,
       email: updateUser.email,
-      isAdmin: updateUser.isAdmin,
+      
     });
   } else {
     res.status(404).json({ message: "User not found" });
@@ -335,42 +335,29 @@ const displayCartItems = asyncHandler(async (req, res) => {
 // private
 const updateCartItemQuantity = asyncHandler(async (req, res) => {
   const { userId, productId, newQuantity } = req.body;
-  
-  if (!userId || !productId || !newQuantity) {
-    return res
-      .status(400)
-      .json({ error: "UserId, productId, and newQuantity are required" });
-  }
-  if (newQuantity < 1) {
-    return res.status(400).json({ error: "New quantity must be at least 1" });
-  }
-
+  console.log(req.body, 'inside change qty');
   try {
+    if (!userId || !productId || !newQuantity) {
+      return res.status(400).json({ error: "UserId, productId, and newQuantity are required" });
+    }
+    if (newQuantity < 1) {
+      return res.status(400).json({ error: "New quantity must be at least 1" });
+    }
     const user = await User.findById(userId);
-
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-
-    const cartItemIndex = user.cartItems.findIndex(
-      (item) => item.product.toString() === productId
-    );
-
+    const cartItemIndex = user.cartItems.findIndex(item => item.product.toString() === productId);
     if (cartItemIndex === -1) {
       return res.status(404).json({ error: "Product not found in the cart" });
     }
-
     const updatedCartItems = [...user.cartItems];
     updatedCartItems[cartItemIndex].quantity = newQuantity;
-
-    await User.findByIdAndUpdate(userId, {
-      cartItems: updatedCartItems,
-    });
-
-    res.status(200).json({ message: "Quantity updated successfully" });
+    await User.findByIdAndUpdate(userId, { cartItems: updatedCartItems });
+    res.status(200).json({ message: "Quantity updated successfully",updatedCartItems });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "Internal the  server error" });
   }
 });
 

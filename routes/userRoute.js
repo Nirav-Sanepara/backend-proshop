@@ -28,11 +28,11 @@ router.post('/addTocart',protect,addToCart)
 router.post('/removecart',protect,removeFromCart)
 router.post('/addTofavourite',protect,favouriteItemAdd)
 router.post('/removeFav',protect,favouriteItemRemove)
-router.put('/updateCartItemQuantity', updateCartItemQuantity)
+router.post('/updateqty', updateCartItemQuantity)
 router
   .route("/profile")
   .get(protect, getUserProfile);
- router.put('/profile',updateUserProfile) 
+router.put('/profile/:id',updateUserProfile)
 
   router.route("/usersdata").get(allUserDataGetting)
 
