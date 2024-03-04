@@ -34,6 +34,6 @@ router
   .get(protect, getUserProfile);
 router.put('/profile/:id',updateUserProfile)
 
-  router.route("/usersdata").get(allUserDataGetting)
+router.route("/").get(protect, allUserDataGetting)
 
 export default router;

@@ -53,12 +53,12 @@ const registerUser = asyncHandler(async (req, res) => {
     console.log(user, 'user signup');
     if (user) {
       const token = generateToken(user._id)
-      console.log('token get ---- ', token);
+      
       res.status(201).json({
         _id: user._id,
         name: user.name,
         email: user.email,
-        role:user.role,
+        role: user.role,
         token: generateToken(user._id),
       });
     } else {
@@ -111,14 +111,14 @@ const registerUserActive = asyncHandler(async (req, res) => {
 
 
     if (user) {
-      const token = generateToken(user._id)
-      console.log('token gen ---- ', token);
+     // const token = generateToken(user._id)
+     
       res.status(201).json({
         _id: user._id,
         name: user.name,
         email: user.email,
         isActive: user.isActive,
-        role:user.role,
+        role: user.role,
         token: generateToken(user._id),
       });
     } else {
@@ -152,12 +152,8 @@ const registerUserActive = asyncHandler(async (req, res) => {
 // @@ Soft delete user with isActive info
 
 const userProfileSoftDelete = asyncHandler(async (req, res) => {
-
   // const isExists = await User.find({ _id:req.params._id })
-  console.log('inside soft delete');
-
   const user = await User.findByIdAndUpdate({ _id: req.params.id }, { ...req.body, isActive: false })
-  console.log(user, 'user data that going to delete');
   try {
     if (user) {
 
@@ -175,16 +171,16 @@ const userProfileSoftDelete = asyncHandler(async (req, res) => {
 // @access Private 
 
 const getUserProfile = asyncHandler(async (req, res) => {
-  // console.log(req.user, "req userrr");
+  
   const user = await User.findById(req.user._id);
-  // console.log(req.user._id, "req.user._id");
+ 
 
   if (user) {
     res.json({
       _id: user._id,
       name: user.name,
       email: user.email,
-      
+      role:user.role
     });
   } else {
     res.status(404);
@@ -212,7 +208,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       _id: updateUser._id,
       name: updateUser.name,
       email: updateUser.email,
-      
+      role:user.role
     });
   } else {
     res.status(404).json({ message: "User not found" });
@@ -301,7 +297,7 @@ const removeFromCart = asyncHandler(async (req, res) => {
     const cartItem = {
       product: productId,
     };
-    // console.log("product", product);
+
     await User.findByIdAndUpdate(userId, { $pull: { cartItems: cartItem } });
     res.status(200).json("Product removed from cart successfully");
   } catch (error) {
@@ -335,7 +331,7 @@ const displayCartItems = asyncHandler(async (req, res) => {
 // private
 const updateCartItemQuantity = asyncHandler(async (req, res) => {
   const { userId, productId, newQuantity } = req.body;
-  console.log(req.body, 'inside change qty');
+  
   try {
     if (!userId || !productId || !newQuantity) {
       return res.status(400).json({ error: "UserId, productId, and newQuantity are required" });
@@ -354,7 +350,7 @@ const updateCartItemQuantity = asyncHandler(async (req, res) => {
     const updatedCartItems = [...user.cartItems];
     updatedCartItems[cartItemIndex].quantity = newQuantity;
     await User.findByIdAndUpdate(userId, { cartItems: updatedCartItems });
-    res.status(200).json({ message: "Quantity updated successfully",updatedCartItems });
+    res.status(200).json({ message: "Quantity updated successfully", updatedCartItems });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal the  server error" });
@@ -369,10 +365,11 @@ const updateCartItemQuantity = asyncHandler(async (req, res) => {
 const favouriteItemAdd = asyncHandler(async (req, res) => {
   const { productId, userId } = req.body;
   const product = await Product.findById(productId)
+
   try {
- const favourite= {
-         product
- }
+    const favourite = {
+      product
+    }
     if (product) {
       await User.findByIdAndUpdate(userId, { $addToSet: { favoriteProducts: favourite } });
       res.status(200).json('Product added to favourite item in list successfully');
@@ -405,7 +402,9 @@ const favouriteItemRemove = asyncHandler(async (req, res) => {
 
 const displayFavouriteItems = asyncHandler(async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
+    const user = await User.findById(req.user._id).populate(
+      "favoriteProducts.product"
+    );;
     if (user) {
       const cartItems = user.favoriteProducts;
       console.log(cartItems);

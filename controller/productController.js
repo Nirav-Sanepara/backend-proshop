@@ -3,15 +3,15 @@ import Product from "../models/productModel.js";
 
 const getProducts = asyncHandler(async (req, res) => {
   const products = await Product.find({});
-  products.map((prd) => {
-    prd["isFavourite"] = favoriteProducts?.incluides( prd._id) ? true : false;
-  })
+  // products.map((prd) => {
+  //   prd["isFavourite"] = favoriteProducts?.incluides( prd._id) ? true : false;
+  // })
   res.json(products);
 });
 
 const getProductById = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id);
-console.log(product,'products');
+  console.log(product, 'products');
   if (product) {
     res.json(product);
   } else {
@@ -123,11 +123,23 @@ const putUpdateProduct = asyncHandler(async (req, res) => {
 //   res.json(mystory)
 // })
 
-const createdProductByUserId= asyncHandler(async(req,res)=>{
-  const results = await Product.find({user:req.body.user._id})
-  console.log(results,'results');
-  res.json(results)
-})
+const getProductByUserId = asyncHandler(async (req, res) => {
+  console.log('inside get product req');
+  try{
+   const results = await Product.find({user:req.body.user._id})
+   if(results){
+    res.status(200).json(results)
+   }
+   else{
+    res.json("Results not found")
+   }
+  }
+  catch(err){
+    console.log(err,'error');
+    res.json('something went wrong')
+  }
+});
+
 
 export {
   getProducts,
@@ -135,5 +147,5 @@ export {
   deleteProductById,
   addProduct,
   putUpdateProduct,
-  createdProductByUserId
+  getProductByUserId
 };

@@ -60,6 +60,8 @@ const productSchema = new Schema(
       required: false,
       default: 0,
     },
+    
+    
 
   },
   {
