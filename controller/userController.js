@@ -105,7 +105,7 @@ const registerUserActive = asyncHandler(async (req, res) => {
       email,
       password,
       isActive: true,
-      userId: req._id,
+      user: req._id,
       role
     });
 

@@ -44,7 +44,7 @@ const deleteProductById = asyncHandler(async (req, res) => {
 //@access Private
 
 const addProduct = asyncHandler(async (req, res) => {
-  const { name, price, image, category, description, brand, countInStock } =
+  const { name, price, image, category, description, brand, countInStock ,user} =
     req.body;
   console.log("inside add products");
   const products = new Product({
@@ -55,6 +55,7 @@ const addProduct = asyncHandler(async (req, res) => {
     description,
     brand,
     countInStock,
+    user
   });
 
   console.log(
@@ -64,7 +65,7 @@ const addProduct = asyncHandler(async (req, res) => {
     "products from add request"
   );
   const createdProduct = await products.save();
-  res.status(201).json(createdProduct);
+  res.status(201).json({message:"Product added successfully",createdProduct});
   console.log(createdProduct, "response getting from add request");
 });
 
@@ -117,16 +118,10 @@ const putUpdateProduct = asyncHandler(async (req, res) => {
 //All product that created by one user
 //private
 
-// StoryControler.get("/mystory",async(req,res)=>{
-//   const mystory=await PostModel.find({customerId:req.body.customerId})
-//   console.log(mystory)
-//   res.json(mystory)
-// })
-
 const getProductByUserId = asyncHandler(async (req, res) => {
-  console.log('inside get product req');
+  console.log('inside get product req',req.user._id);
   try{
-   const results = await Product.find({user:req.body.user._id})
+   const results = await Product.find({user:req.user._id})
    if(results){
     res.status(200).json(results)
    }
