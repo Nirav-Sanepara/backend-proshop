@@ -15,8 +15,8 @@ router.route("/").get(getProducts);
 router.route("/:id").get(getProductById);
 router.route("/:id").delete(deleteProductById);
 router.route("/add").post(addProduct);
+router.route('/all/products').get(protect, getProductByUserId)
 
 router.route("/:id").put(putUpdateProduct);
-router.route('/all').get(protect, getProductByUserId)
 
 export default router;

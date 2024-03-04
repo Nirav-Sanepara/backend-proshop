@@ -344,13 +344,15 @@ const updateCartItemQuantity = asyncHandler(async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
     const cartItemIndex = user.cartItems.findIndex(item => item.product.toString() === productId);
+    console.log(cartItemIndex, 'cartindex');
     if (cartItemIndex === -1) {
       return res.status(404).json({ error: "Product not found in the cart" });
     }
     const updatedCartItems = [...user.cartItems];
     updatedCartItems[cartItemIndex].quantity = newQuantity;
+    const changedItems=updatedCartItems[cartItemIndex]
     await User.findByIdAndUpdate(userId, { cartItems: updatedCartItems });
-    res.status(200).json({ message: "Quantity updated successfully", updatedCartItems });
+    res.status(200).json({ message: "Quantity updated successfully", changedItems});
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal the  server error" });
@@ -363,25 +365,45 @@ const updateCartItemQuantity = asyncHandler(async (req, res) => {
 //private
 
 const favouriteItemAdd = asyncHandler(async (req, res) => {
-  const { productId, userId } = req.body;
-  const product = await Product.findById(productId)
+  const { userId, productId } = req.body;
 
+  if (!userId || !productId) {
+    return res
+      .status(400)
+      .json({ error: "UserId, productId, and quantity are required" });
+  }
+  
   try {
-    const favourite = {
-      product
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
     }
-    if (product) {
-      await User.findByIdAndUpdate(userId, { $addToSet: { favoriteProducts: favourite } });
-      res.status(200).json('Product added to favourite item in list successfully');
-    }
-    else {
-      res.json({ message: "Product not found" })
-    }
+
+    const existingCartItem = await User.findOne({
+      _id: userId,
+      'favoriteProducts.product': productId,
+    });
+
+    
+      // If the product is not in the cart, add it as a new item
+      const favourite = {
+        product: product,
+        
+      };
+
+      await User.findByIdAndUpdate(userId, {
+        $addToSet: { favoriteProducts: favourite },
+      });
+    
+
+    res
+      .status(200)
+      .json({ message: "Product added to favourite list successfully",favourite });
   } catch (error) {
     console.error(error);
-    res.status(500).json('Internal server error', error);
+    res.status(500).json({ error: "Internal server error" });
   }
-})
+});
 
 //@fav item remove req
 //private
