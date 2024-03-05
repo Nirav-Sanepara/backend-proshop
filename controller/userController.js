@@ -366,21 +366,22 @@ const updateCartItemQuantity = asyncHandler(async (req, res) => {
 
     const updatedCartItems = [...user.cartItems];
     const originalCartItem = updatedCartItems[cartItemIndex];
-
+    
     // Update the quantity
     originalCartItem.quantity = newQuantity;
+    const product= await Product.findById(originalCartItem.product)
+    ///console.log(product,'products');
+
+    originalCartItem.product=product
+
+   // console.log(originalCartItem, 'original cart items');
 
     // Save the updated user with the modified cartItems
     await user.save();
 
-    // Additional information about the changed item
-    const changedItems = {
-      
-      product: originalCartItem, // Add the actual field names based on your schema
-      newQuantity: originalCartItem.quantity,
-    };
+   
 
-    res.status(200).json({ message: "Quantity updated successfully", changedItems });
+    res.status(200).json({ message: "Quantity updated successfully", changedItems: originalCartItem, });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });
