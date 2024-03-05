@@ -131,22 +131,6 @@ const registerUserActive = asyncHandler(async (req, res) => {
     res.json({ message: "Something went wrong please try again later" })
   }
 
-
-  // try{
-  //   const  userdata=await User.find();
-  //   const x=userdata.filter((ele)=>{
-  //     ele.role='user'
-  //   })
-  //   if(x){
-  //    await x.save()
-  //    res.json({message:"added user", x})
-
-  //   }
-  // }
-  // catch(error){
-  //   res.json({message:"something went wrong", error})
-  // }
-
 });
 
 // @@ Soft delete user with isActive info
@@ -329,35 +313,80 @@ const displayCartItems = asyncHandler(async (req, res) => {
 
 // update quantity api
 // private
+// const updateCartItemQuantity = asyncHandler(async (req, res) => {
+//   const { userId, productId, newQuantity } = req.body;
+  
+//   try {
+//     if (!userId || !productId || !newQuantity) {
+//       return res.status(400).json({ error: "UserId, productId, and newQuantity are required" });
+//     }
+//     if (newQuantity < 1) {
+//       return res.status(400).json({ error: "New quantity must be at least 1" });
+//     }
+//     const user = await User.findById(userId);
+//     if (!user) {
+//       return res.status(404).json({ error: "User not found" });
+//     }
+//     const cartItemIndex = user.cartItems.findIndex(item => item.product.toString() === productId);
+//     console.log(cartItemIndex, 'cartindex');
+//     if (cartItemIndex === -1) {
+//       return res.status(404).json({ error: "Product not found in the cart" });
+//     }
+//     const updatedCartItems = [...user.cartItems];
+//     updatedCartItems[cartItemIndex].quantity = newQuantity;
+//     const changedItems=updatedCartItems[cartItemIndex]
+//     await User.findByIdAndUpdate(userId, { cartItems: updatedCartItems });
+//     res.status(200).json({ message: "Quantity updated successfully", changedItems});
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: "Internal the  server error" });
+//   }
+// });
 const updateCartItemQuantity = asyncHandler(async (req, res) => {
   const { userId, productId, newQuantity } = req.body;
-  
+
   try {
     if (!userId || !productId || !newQuantity) {
       return res.status(400).json({ error: "UserId, productId, and newQuantity are required" });
     }
+
     if (newQuantity < 1) {
       return res.status(400).json({ error: "New quantity must be at least 1" });
     }
+
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
+
     const cartItemIndex = user.cartItems.findIndex(item => item.product.toString() === productId);
-    console.log(cartItemIndex, 'cartindex');
     if (cartItemIndex === -1) {
       return res.status(404).json({ error: "Product not found in the cart" });
     }
+
     const updatedCartItems = [...user.cartItems];
-    updatedCartItems[cartItemIndex].quantity = newQuantity;
-    const changedItems=updatedCartItems[cartItemIndex]
-    await User.findByIdAndUpdate(userId, { cartItems: updatedCartItems });
-    res.status(200).json({ message: "Quantity updated successfully", changedItems});
+    const originalCartItem = updatedCartItems[cartItemIndex];
+
+    // Update the quantity
+    originalCartItem.quantity = newQuantity;
+
+    // Save the updated user with the modified cartItems
+    await user.save();
+
+    // Additional information about the changed item
+    const changedItems = {
+      
+      product: originalCartItem, // Add the actual field names based on your schema
+      newQuantity: originalCartItem.quantity,
+    };
+
+    res.status(200).json({ message: "Quantity updated successfully", changedItems });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal the  server error" });
+    res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 // favourite items handling api
 
