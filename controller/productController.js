@@ -46,7 +46,7 @@ const deleteProductById = asyncHandler(async (req, res) => {
 const addProduct = asyncHandler(async (req, res) => {
   const { name, price, image, category, description, brand, countInStock ,user} =
     req.body;
-  console.log("inside add products");
+  console.log("inside add products", user);
   const products = new Product({
     name,
     price,
@@ -58,12 +58,7 @@ const addProduct = asyncHandler(async (req, res) => {
     user
   });
 
-  console.log(
-    req.body,
-    "req body add req",
-    products,
-    "products from add request"
-  );
+  
   const createdProduct = await products.save();
   res.status(201).json({message:"Product added successfully",createdProduct});
   console.log(createdProduct, "response getting from add request");
