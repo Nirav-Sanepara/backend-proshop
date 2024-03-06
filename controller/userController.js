@@ -441,7 +441,7 @@ const favouriteItemAdd = asyncHandler(async (req, res) => {
 const favouriteItemRemove = asyncHandler(async (req, res) => {
   const { userId, productId } = req.body;
   try {
-    await User.findByIdAndUpdate(userId, { $pull: { favoriteProducts: { productId } } });
+    await User.findByIdAndUpdate(userId, { $pull: { favoriteProducts: { product :productId } } });
     res.status(200).json('Product removed from cart successfully');
   } catch (error) {
     console.error(error);

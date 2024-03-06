@@ -6,6 +6,7 @@ import {
   addProduct,
   putUpdateProduct,
   getProductByUserId,
+  updateProductCountInStock
 } from "../controller/productController.js";
 import { protect } from "../middleware/authMiddleware.js";
 const router = express.Router();
@@ -18,5 +19,7 @@ router.route("/add").post(protect,addProduct);
 router.route('/all/products').get(protect,getProductByUserId)
 
 router.route("/:id").put(putUpdateProduct);
+router.route("/updateCount/:id").patch(updateProductCountInStock);
 
 export default router;
+

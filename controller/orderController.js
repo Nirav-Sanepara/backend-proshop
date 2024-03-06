@@ -23,7 +23,7 @@ const addOrderItems = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("No order items");
   } else if(userExists.isActive==true) {
-    console.log(orderItems, "items");
+    
     const order = new Order({
       orderItems:cartItems,
       user: req.user?._id,
@@ -48,11 +48,13 @@ const addOrderItems = asyncHandler(async (req, res) => {
 //@access Private
 
 const getOrderById = asyncHandler(async (req, res) => {
-  const userExists=await User.findById({_id:req.user?._id,})
-  const order = await Order.findById(req.params.id).populate(
-    "user",
-    "name email"
-  );
+  const userExists = await User.findById({_id:req.user?._id,})
+  // const order = await Order.findById(req.params.id).populate(
+  //   "user",
+  //   "name email"
+  // );
+  const order = await Order.find({user:req.user._id})
+  // console.log(order,'orders');
   if (order && userExists.isActive==true) {
     res.json(order);
   } else {
@@ -63,3 +65,5 @@ const getOrderById = asyncHandler(async (req, res) => {
 });
 
 export { addOrderItems, getOrderById };
+
+
