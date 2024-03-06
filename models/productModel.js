@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { object, string, number, date } from 'yup';
 const { Schema } = mongoose;
 
 const reviewSchema = mongoose.Schema(
@@ -19,26 +20,14 @@ const productSchema = new Schema(
       required: false,
       ref: "User",
     },
-    name: {
-      type: String,
-      required: false,
-    },
+    name: string().min(1).max(100).required(),
     image: {
       type: String,
       required: false,
     },
-    brand: {
-      type: String,
-      required: false,
-    },
-    category: {
-      type: String,
-      required: false,
-    },
-    description: {
-      type: String,
-      required: false,
-    },
+    brand: string().min(1).max(100).required(),
+    category:string().min(1).max(100).required(),
+    description: string().min(1).max(500).required(),
     reviews: [reviewSchema],
     rating: {
       type: Number,
@@ -50,16 +39,8 @@ const productSchema = new Schema(
       required: false,
       default: 0,
     },
-    price: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
-    countInStock: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
+    price: number().required(),
+    countInStock: number().required().default(0),
 
     isActive: {
       type: Boolean,

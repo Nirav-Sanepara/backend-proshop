@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import User from "../models/userModel.js";
 const getProducts = asyncHandler(async (req, res) => {
   //const products = await Product.find({});
-  let products = await Product.find({});
+  let products = await Product.find({isActive:true});
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
@@ -21,8 +21,11 @@ const getProducts = asyncHandler(async (req, res) => {
     return {
       ...prd.toObject(),
       isFavourite: favoriteProducts?.includes(prd._id.toString()),
+      
     };
   });
+  products=products
+
   res.json(products)
 });
 
@@ -63,7 +66,7 @@ const deleteProductById = asyncHandler(async (req, res) => {
 const addProduct = asyncHandler(async (req, res) => {
   const { name, price, image, category, description, brand, countInStock ,user,isActive} =
     req.body;
-  console.log("inside add products", user);
+ 
   const products = new Product({
     name,
     price,
@@ -89,7 +92,7 @@ const addProduct = asyncHandler(async (req, res) => {
 const putUpdateProduct = asyncHandler(async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-
+   console.log(product,'product put request-------------------------');
     if (product) {
       const updates = Object.keys(req.body);
       const allowedUpdates = [
@@ -104,13 +107,16 @@ const putUpdateProduct = asyncHandler(async (req, res) => {
         "numReviews",
         "price",
         "countInStock",
-        "addedInCart",
-        "addedQtyInCart",
+        "isActive"
       ];
       const isValidOperation = updates.every((update) => {
         return allowedUpdates.includes(update);
       });
+      console.log(
+        updates, 'req body 7777777777777777777777777777777'
+      );
       if (!isValidOperation) {
+        console.log(isValidOperation,'iaValidOperation=============');
         return res
           .status(400)
           .json({ status: "fail", message: "Invalid updates" });
@@ -132,7 +138,7 @@ const putUpdateProduct = asyncHandler(async (req, res) => {
 //private
 
 const getProductByUserId = asyncHandler(async (req, res) => {
-  console.log('inside get product req',req.user._id);
+ 
   try{
    const results = await Product.find({user:req.user._id})
    if(results){

@@ -2,6 +2,8 @@ import asyncHandler from "express-async-handler";
 import User from "../models/userModel.js";
 import generateToken from "../utils/generateToken.js";
 import Product from '../models/productModel.js'
+import yup, { string } from 'yup';
+
 // @desc Auth user and get token
 //@route POST /api/users/login
 //@access Public
@@ -53,7 +55,7 @@ const registerUser = asyncHandler(async (req, res) => {
     console.log(user, 'user signup');
     if (user) {
       const token = generateToken(user._id)
-      
+
       res.status(201).json({
         _id: user._id,
         name: user.name,
@@ -73,10 +75,51 @@ const registerUser = asyncHandler(async (req, res) => {
 //@signup first time based on condition
 //@access Public
 
-const registerUserActive = asyncHandler(async (req, res) => {
-  const { name, email, password, role } = req.body;
 
-  const userExists = await User.findOne({ email });
+
+
+
+// const userValidationSchema = yup.object({
+//   username: yup.string().required(),
+//   email: yup.string().email().required(),
+//   password: yup.string().required(),
+// });
+
+// POST endpoint for creating a user
+// app.post('/api/users', async (req, res) => {
+//   try {
+//     // Validate the request body using Yup
+//     await userValidationSchema.validate(req.body);
+
+//     // Create a new user using Mongoose model
+//     const newUser = new User(req.body);
+
+//     // Save the user to the database
+//     await newUser.save();
+
+//     res.status(201).json({ message: 'User created successfully', user: newUser });
+//   } catch (error) {
+//     // Handle validation or database errors
+//     res.status(400).json({ error: error.message });
+//   }
+// });
+
+
+
+
+const registerUserActive = asyncHandler(async (req, res) => {
+  const isValidate = yup.object({
+
+    name: yup.string().min(1).required(),
+    email: yup.string().email().required(),
+    password: yup.string().required(),
+    role: yup.string()
+
+  })
+const x= await isValidate.validate(req.body)
+console.log(x,'request body ===============================================',isValidate);
+
+  const userExists = await User.findOne({ email:x.email });
 
 
   if (userExists && userExists.isActive == true) {
@@ -98,28 +141,19 @@ const registerUserActive = asyncHandler(async (req, res) => {
 
 
 
-    //User.create() is similar as User.save()
-
-    const user = await User.create({
-      name,
-      email,
-      password,
-      isActive: true,
-      user: req._id,
-      role
-    });
-
-
-    if (user) {
-     // const token = generateToken(user._id)
-     
+    
+   const newUser=new User(req.body)
+   newUser.isActive=true
+   await newUser.save()
+    if (newUser) {
+      
       res.status(201).json({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        isActive: user.isActive,
-        role: user.role,
-        token: generateToken(user._id),
+        _id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        isActive: newUser.isActive,
+        role: newUser.role,
+        token: generateToken(newUser._id),
       });
     } else {
       res.status(400).send({ message: "Invalid user data" });
@@ -131,9 +165,9 @@ const registerUserActive = asyncHandler(async (req, res) => {
     res.json({ message: "Something went wrong please try again later" })
   }
 
-});
+ });
 
-// @@ Soft delete user with isActive info
+// // @@ Soft delete user with isActive info
 
 const userProfileSoftDelete = asyncHandler(async (req, res) => {
   // const isExists = await User.find({ _id:req.params._id })
@@ -155,16 +189,16 @@ const userProfileSoftDelete = asyncHandler(async (req, res) => {
 // @access Private 
 
 const getUserProfile = asyncHandler(async (req, res) => {
-  
+
   const user = await User.findById(req.user._id);
- 
+
 
   if (user) {
     res.json({
       _id: user._id,
       name: user.name,
       email: user.email,
-      role:user.role
+      role: user.role
     });
   } else {
     res.status(404);
@@ -192,7 +226,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       _id: updateUser._id,
       name: updateUser.name,
       email: updateUser.email,
-      role:user.role
+      role: user.role
     });
   } else {
     res.status(404).json({ message: "User not found" });
@@ -315,7 +349,7 @@ const displayCartItems = asyncHandler(async (req, res) => {
 // private
 // const updateCartItemQuantity = asyncHandler(async (req, res) => {
 //   const { userId, productId, newQuantity } = req.body;
-  
+
 //   try {
 //     if (!userId || !productId || !newQuantity) {
 //       return res.status(400).json({ error: "UserId, productId, and newQuantity are required" });
@@ -366,20 +400,20 @@ const updateCartItemQuantity = asyncHandler(async (req, res) => {
 
     const updatedCartItems = [...user.cartItems];
     const originalCartItem = updatedCartItems[cartItemIndex];
-    
+
     // Update the quantity
     originalCartItem.quantity = newQuantity;
-    const product= await Product.findById(originalCartItem.product)
+    const product = await Product.findById(originalCartItem.product)
     ///console.log(product,'products');
 
-    originalCartItem.product=product
+    originalCartItem.product = product
 
-   // console.log(originalCartItem, 'original cart items');
+    // console.log(originalCartItem, 'original cart items');
 
     // Save the updated user with the modified cartItems
     await user.save();
 
-   
+
 
     res.status(200).json({ message: "Quantity updated successfully", changedItems: originalCartItem, });
   } catch (error) {
@@ -402,7 +436,7 @@ const favouriteItemAdd = asyncHandler(async (req, res) => {
       .status(400)
       .json({ error: "UserId, productId, and quantity are required" });
   }
-  
+
   try {
     const product = await Product.findById(productId);
     if (!product) {
@@ -414,21 +448,21 @@ const favouriteItemAdd = asyncHandler(async (req, res) => {
       'favoriteProducts.product': productId,
     });
 
-    
-      // If the product is not in the cart, add it as a new item
-      const favourite = {
-        product: product,
-        
-      };
 
-      await User.findByIdAndUpdate(userId, {
-        $addToSet: { favoriteProducts: favourite },
-      });
-    
+    // If the product is not in the cart, add it as a new item
+    const favourite = {
+      product: product,
+
+    };
+
+    await User.findByIdAndUpdate(userId, {
+      $addToSet: { favoriteProducts: favourite },
+    });
+
 
     res
       .status(200)
-      .json({ message: "Product added to favourite list successfully",favourite });
+      .json({ message: "Product added to favourite list successfully", favourite });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });
