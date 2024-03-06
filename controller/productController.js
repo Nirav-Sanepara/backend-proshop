@@ -1,12 +1,29 @@
 import asyncHandler from "express-async-handler";
 import Product from "../models/productModel.js";
-
+import jwt from "jsonwebtoken";
+import User from "../models/userModel.js";
 const getProducts = asyncHandler(async (req, res) => {
-  const products = await Product.find({});
-  // products.map((prd) => {
-  //   prd["isFavourite"] = favoriteProducts?.incluides( prd._id) ? true : false;
-  // })
-  res.json(products);
+  //const products = await Product.find({});
+  let products = await Product.find({});
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    const token = req.headers.authorization.split(" ")[1];
+    const decode = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = await User.findById(decode.id).select("-password");
+  }
+  // console.log("req.user", req.user);
+  const favoriteProducts = req.user?.favoriteProducts?.map((ele) =>
+    ele.product.toString()
+  );
+  products = products.map((prd) => {
+    return {
+      ...prd.toObject(),
+      isFavourite: favoriteProducts?.includes(prd._id.toString()),
+    };
+  });
+  res.json(products)
 });
 
 const getProductById = asyncHandler(async (req, res) => {
@@ -44,7 +61,7 @@ const deleteProductById = asyncHandler(async (req, res) => {
 //@access Private
 
 const addProduct = asyncHandler(async (req, res) => {
-  const { name, price, image, category, description, brand, countInStock ,user} =
+  const { name, price, image, category, description, brand, countInStock ,user,isActive} =
     req.body;
   console.log("inside add products", user);
   const products = new Product({
@@ -55,7 +72,8 @@ const addProduct = asyncHandler(async (req, res) => {
     description,
     brand,
     countInStock,
-    user
+    user : req.user._id,
+    isActive
   });
 
   

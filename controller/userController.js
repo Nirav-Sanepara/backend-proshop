@@ -220,7 +220,6 @@ const allUserDataGetting = asyncHandler(async (req, res) => {
 
 const addToCart = asyncHandler(async (req, res) => {
   const { userId, productId, quantity } = req.body;
-
   if (!userId || !productId || !quantity) {
     return res
       .status(400)
@@ -234,38 +233,39 @@ const addToCart = asyncHandler(async (req, res) => {
     if (!product) {
       return res.status(404).json({ error: "Product not found" });
     }
-
     const existingCartItem = await User.findOne({
       _id: userId,
-      'cartItems.product': productId,
+      "cartItems.product": productId,
     });
-
     if (existingCartItem) {
       // If the product already exists in the cart, update the quantity
       await User.updateOne(
         {
           _id: userId,
-          'cartItems.product': productId,
+          "cartItems.product": productId,
         },
         {
-          $inc: { 'cartItems.$.quantity': quantity },
+          $inc: { "cartItems.$.quantity": quantity },
         }
       );
+      res.status(200).json({
+        message: "Product added to cart successfully",
+        product,
+      });
     } else {
       // If the product is not in the cart, add it as a new item
       const cartItem = {
         product: product,
         quantity: quantity,
       };
-
       await User.findByIdAndUpdate(userId, {
         $addToSet: { cartItems: cartItem },
       });
+      res.status(200).json({
+        message: "Product added to cart successfully",
+        product: cartItem,
+      });
     }
-
-    res
-      .status(200)
-      .json({ message: "Product added to cart successfully", product });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });

@@ -3,20 +3,20 @@ const { Schema } = mongoose;
 
 const orderSchema = new Schema(
   {
-    userId: {
+    user: {
       type: mongoose.Schema.Types.ObjectId,
-      required: true,
+      required: false,
       ref: "User",
     },
     orderItems: [
       {
         name: { type: String, required: true },
-        qty: { type: Number, required: true },
+        qty: { type: Number, required: false },
         image: { type: String, required: true },
         price: { type: Number, required: true },
         product: {
           type: mongoose.Schema.Types.ObjectId,
-          required: true,
+          required: false,
           ref: "Product",
         },
       },
@@ -37,7 +37,7 @@ const orderSchema = new Schema(
       update_time: { type: String },
       email_address: { type: String },
     },
-    textPrice: {
+    texPrice: {
       type: Number,
       required: true,
       default: 0,

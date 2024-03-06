@@ -10,7 +10,7 @@ const addOrderItems = asyncHandler(async (req, res) => {
   console.log("req.body", req.body);
   const userExists=await User.findById({_id:req.user?._id,})
   const {
-    orderItems,
+    cartItems,
     shippingAddress,
     paymentMethod,
     itemsPrice,
@@ -19,13 +19,13 @@ const addOrderItems = asyncHandler(async (req, res) => {
     totalPrice,
   } = req.body;
 
-  if (orderItems && orderItems.length === 0) {
+  if (cartItems && cartItems.length === 0) {
     res.status(400);
     throw new Error("No order items");
   } else if(userExists.isActive==true) {
     console.log(orderItems, "items");
     const order = new Order({
-      orderItems,
+      orderItems:cartItems,
       user: req.user?._id,
       shippingAddress,
       paymentMethod,
@@ -35,7 +35,7 @@ const addOrderItems = asyncHandler(async (req, res) => {
       totalPrice,
     });
     const orderCreated = await order.save();
-    console.log(order, "after order controller");
+   
     res.status(201).json(orderCreated);
   }
   else{

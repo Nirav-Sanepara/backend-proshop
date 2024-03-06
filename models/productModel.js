@@ -60,8 +60,12 @@ const productSchema = new Schema(
       required: false,
       default: 0,
     },
-    
-    
+
+    isActive: {
+      type: Boolean,
+      required: true,
+      default: true
+    }
 
   },
   {
