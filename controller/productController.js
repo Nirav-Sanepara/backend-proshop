@@ -21,6 +21,7 @@ const getProducts = asyncHandler(async (req, res) => {
     return {
       ...prd.toObject(),
       isFavourite: favoriteProducts?.includes(prd._id.toString()),
+      
     };
   });
   console.log(products);
@@ -62,18 +63,9 @@ const deleteProductById = asyncHandler(async (req, res) => {
 //@access Private
 
 const addProduct = asyncHandler(async (req, res) => {
-  const {
-    name,
-    price,
-    image,
-    category,
-    description,
-    brand,
-    countInStock,
-    user,
-    isActive,
-  } = req.body;
-  console.log("inside add products", user);
+  const { name, price, image, category, description, brand, countInStock ,user,isActive} =
+    req.body;
+ 
   const products = new Product({
     name,
     price,
@@ -100,7 +92,7 @@ const addProduct = asyncHandler(async (req, res) => {
 const putUpdateProduct = asyncHandler(async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-
+   console.log(product,'product put request-------------------------');
     if (product) {
       const updates = Object.keys(req.body);
       const allowedUpdates = [
@@ -115,13 +107,16 @@ const putUpdateProduct = asyncHandler(async (req, res) => {
         "numReviews",
         "price",
         "countInStock",
-        "addedInCart",
-        "addedQtyInCart",
+        "isActive"
       ];
       const isValidOperation = updates.every((update) => {
         return allowedUpdates.includes(update);
       });
+      console.log(
+        updates, 'req body 7777777777777777777777777777777'
+      );
       if (!isValidOperation) {
+        console.log(isValidOperation,'iaValidOperation=============');
         return res
           .status(400)
           .json({ status: "fail", message: "Invalid updates" });
@@ -160,17 +155,19 @@ const updateProductCountInStock = asyncHandler(async (req, res) => {
 //private
 
 const getProductByUserId = asyncHandler(async (req, res) => {
-  console.log("inside get product req", req.user._id);
-  try {
-    const results = await Product.find({ user: req.user._id });
-    if (results) {
-      res.status(200).json(results);
-    } else {
-      res.json("Results not found");
-    }
-  } catch (err) {
-    console.log(err, "error");
-    res.json("something went wrong");
+ 
+  try{
+   const results = await Product.find({user:req.user._id})
+   if(results){
+    res.status(200).json(results)
+   }
+   else{
+    res.json("Results not found")
+   }
+  }
+  catch(err){
+    console.log(err,'error');
+    res.json('something went wrong')
   }
 });
 

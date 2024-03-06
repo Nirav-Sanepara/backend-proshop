@@ -1,6 +1,7 @@
 
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs/dist/bcrypt.js";
+import { object, string, number, date } from 'yup';
 const { Schema } = mongoose;
 
 const userSchema = new Schema(
@@ -10,20 +11,9 @@ const userSchema = new Schema(
       required: false,
       ref: "User",
     },
-    name: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    password: {
-      type: String,
-      required: true,
-    },
+    name: string().min(8).max(100).required(),
+    email: string().email().required(),
+    password: string().min(1).max(10),
     role: {
       type: String,
       enum: ['admin', 'merchant', 'user'],
