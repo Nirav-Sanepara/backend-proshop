@@ -9,11 +9,15 @@ import yup, { string } from 'yup';
 //@access Public
 
 const authUser = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
+  const isValidate=yup.object({
+  email:yup.string().email().required(),
+  password:yup.string()
+  })
+  const x = await isValidate.validate(req.body)
 
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email:x.email });
   console.log(user, "isActive data");
-  if (user && user.isActive == true && (await user.matchPassword(password))) {
+  if (user && user.isActive == true && (await user.matchPassword(x.password))) {
     const token = generateToken(user._id)
     console.log('token get ---- ', token);
     res.json({
@@ -117,7 +121,7 @@ const registerUserActive = asyncHandler(async (req, res) => {
 
   })
 const x= await isValidate.validate(req.body)
-console.log(x,'request body ===============================================',isValidate);
+//console.log(x,'request body ===============================================',isValidate,'yup validate =========================================');
 
   const userExists = await User.findOne({ email:x.email });
 
@@ -175,7 +179,7 @@ const userProfileSoftDelete = asyncHandler(async (req, res) => {
   try {
     if (user) {
 
-      res.status(200).json({ message: 'Account deleted Successfully' })
+      res.status(200).json({ message: 'Account deleted Successfully',user })
     }
   }
   catch (err) {
@@ -238,7 +242,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 const allUserDataGetting = asyncHandler(async (req, res) => {
 
   try {
-    let results = await User.find({})
+    let results = await User.find()
 
     res.json(results)
   }

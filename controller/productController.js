@@ -5,6 +5,7 @@ import User from "../models/userModel.js";
 const getProducts = asyncHandler(async (req, res) => {
   //const products = await Product.find({});
   let products = await Product.find({isActive:true});
+
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
@@ -17,16 +18,34 @@ const getProducts = asyncHandler(async (req, res) => {
   const favoriteProducts = req.user?.favoriteProducts?.map((ele) =>
     ele.product.toString()
   );
-  products = products.map((prd) => {
-    return {
+  
+ 
+  
+    if(req.user){
+      products = products.map((prd) => {
+        return {
+          ...prd.toObject(),
+          isFavourite: favoriteProducts?.includes(prd._id.toString()),
+          
+        };
+      });
+      products=products
+    
+      res.json(products)
+    }
+   else{
+    products = products.map((prd) => ({
       ...prd.toObject(),
-      isFavourite: favoriteProducts?.includes(prd._id.toString()),
-      
-    };
-  });
-  products=products
-
-  res.json(products)
+      isFavorite: false,
+    }));
+   
+    
+    res.status(200).json(products);
+   }
+  
+   
+  
+ 
 });
 
 const getProductById = asyncHandler(async (req, res) => {
@@ -154,6 +173,18 @@ const getProductByUserId = asyncHandler(async (req, res) => {
   }
 });
 
+const updateStatusOfProductActive = asyncHandler(async (req,res)=>{
+  const isExists = await Product.findById(req.params.id)
+  if(isExists){
+    isExists.isActive=!isExists.isActive
+    isExists.save()
+    res.status(200).json({message:"Product status changed successfully", isExists})
+  }
+  else{
+    res.status(404).json({message:"Product not found"})
+  }
+})
+
 
 export {
   getProducts,
@@ -161,5 +192,6 @@ export {
   deleteProductById,
   addProduct,
   putUpdateProduct,
-  getProductByUserId
+  getProductByUserId,
+  updateStatusOfProductActive
 };
