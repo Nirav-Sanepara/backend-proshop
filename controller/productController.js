@@ -117,6 +117,7 @@ const putUpdateProduct = asyncHandler(async (req, res) => {
         "countInStock",
         "addedInCart",
         "addedQtyInCart",
+        "isActive"
       ];
       const isValidOperation = updates.every((update) => {
         return allowedUpdates.includes(update);
