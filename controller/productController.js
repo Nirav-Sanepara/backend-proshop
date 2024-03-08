@@ -4,8 +4,17 @@ import jwt from "jsonwebtoken";
 import User from "../models/userModel.js";
 const getProducts = asyncHandler(async (req, res) => {
   //const products = await Product.find({});
-  let products = await Product.find({isActive:true});
+  const activeUserIds = (await User.find({ isActive: true })).map(user => user._id);
 
+  var products = await Product.find({
+    isActive: true,
+    user: { $in: activeUserIds },
+  });
+
+  // let products = await Product.find({
+  //   creator: { $in: user: (await User.find({ isActive: true })).map(users => users._id) }, isActive: true,
+  // });
+  console.log(products, 'rammmmmmmmmmmmmmmmmmrammmmmmmmmmmmmmmmmmrammmmmmmmmmmmmm1111111111111111111111111111111111111111')
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
@@ -18,35 +27,76 @@ const getProducts = asyncHandler(async (req, res) => {
   const favoriteProducts = req.user?.favoriteProducts?.map((ele) =>
     ele.product.toString()
   );
-  
- 
-  
-    if(req.user){
-      products = products.map((prd) => {
-        return {
-          ...prd.toObject(),
-          isFavourite: favoriteProducts?.includes(prd._id.toString()),
-          
-        };
-      });
-      products=products
-    
-      res.json(products)
-    }
-   else{
+
+  if (req.user) {
+    products = products.map((prd) => {
+      return {
+        ...prd.toObject(),
+        isFavourite: favoriteProducts?.includes(prd._id.toString()),
+
+      };
+    });
+
+
+
+    res.json(products)
+  }
+  else {
     products = products.map((prd) => ({
       ...prd.toObject(),
       isFavorite: false,
     }));
-   
-    
+
+
     res.status(200).json(products);
-   }
-  
-   
-  
- 
+  }
+
+
+
+
 });
+
+// const getProducts = asyncHandler(async (req, res) => {
+//   let products;
+
+//   // Check if the user is authenticated
+//   if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
+//     const token = req.headers.authorization.split(" ")[1];
+//     const decode = jwt.verify(token, process.env.JWT_SECRET);
+//     req.user = await User.findById(decode.id).select("-password");
+
+//     // Fetch products created by active users
+//     products = await Product.find({
+//       creator: { $in: (await User.find({ isActive: true })).map(user => user._id) },
+//     });
+//   } else {
+//     // If user is not authenticated, fetch all products
+//     products = await Product.find({});
+//   }
+
+//   // Check if the user is authenticated
+//   if (req.user) {
+//     const favoriteProducts = req.user.favoriteProducts?.map((ele) => ele.product.toString());
+
+//     // Modify products array to include isFavourite property
+//     products = products.map((prd) => ({
+//       ...prd.toObject(),
+//       isFavourite: favoriteProducts?.includes(prd._id.toString()),
+//     }));
+
+//     console.log(products,'ommmmmmmmmmmmmmmmmmmmmmmmmmmmmmm');
+//     res.json(products);
+//   } else {
+//     // If user is not authenticated, modify products array
+//     products = products.map((prd) => ({
+//       ...prd.toObject(),
+//       isFavorite: false,
+//     }));
+
+//     res.status(200).json(products);
+//   }
+// });
+
 
 const getProductById = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id);
@@ -83,9 +133,9 @@ const deleteProductById = asyncHandler(async (req, res) => {
 //@access Private
 
 const addProduct = asyncHandler(async (req, res) => {
-  const { name, price, image, category, description, brand, countInStock ,user,isActive} =
+  const { name, price, image, category, description, brand, countInStock, user, isActive } =
     req.body;
- 
+
   const products = new Product({
     name,
     price,
@@ -94,13 +144,13 @@ const addProduct = asyncHandler(async (req, res) => {
     description,
     brand,
     countInStock,
-    user : req.user._id,
+    user: req.user._id,
     isActive
   });
 
-  
+
   const createdProduct = await products.save();
-  res.status(201).json({message:"Product added successfully",createdProduct});
+  res.status(201).json({ message: "Product added successfully", createdProduct });
   console.log(createdProduct, "response getting from add request");
 });
 
@@ -111,7 +161,7 @@ const addProduct = asyncHandler(async (req, res) => {
 const putUpdateProduct = asyncHandler(async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-   console.log(product,'product put request-------------------------');
+    console.log(product, 'product put request-------------------------');
     if (product) {
       const updates = Object.keys(req.body);
       const allowedUpdates = [
@@ -135,7 +185,7 @@ const putUpdateProduct = asyncHandler(async (req, res) => {
         updates, 'req body 7777777777777777777777777777777'
       );
       if (!isValidOperation) {
-        console.log(isValidOperation,'iaValidOperation=============');
+        console.log(isValidOperation, 'iaValidOperation=============');
         return res
           .status(400)
           .json({ status: "fail", message: "Invalid updates" });
@@ -157,31 +207,31 @@ const putUpdateProduct = asyncHandler(async (req, res) => {
 //private
 
 const getProductByUserId = asyncHandler(async (req, res) => {
- 
-  try{
-   const results = await Product.find({user:req.user._id})
-   if(results){
-    res.status(200).json(results)
-   }
-   else{
-    res.json("Results not found")
-   }
+
+  try {
+    const results = await Product.find({ user: req.user._id })
+    if (results) {
+      res.status(200).json(results)
+    }
+    else {
+      res.json("Results not found")
+    }
   }
-  catch(err){
-    console.log(err,'error');
+  catch (err) {
+    console.log(err, 'error');
     res.json('something went wrong')
   }
 });
 
-const updateStatusOfProductActive = asyncHandler(async (req,res)=>{
+const updateStatusOfProductActive = asyncHandler(async (req, res) => {
   const isExists = await Product.findById(req.params.id)
-  if(isExists){
-    isExists.isActive=!isExists.isActive
+  if (isExists) {
+    isExists.isActive = !isExists.isActive
     isExists.save()
-    res.status(200).json({message:"Product status changed successfully", isExists})
+    res.status(200).json({ message: "Product status changed successfully", isExists })
   }
-  else{
-    res.status(404).json({message:"Product not found"})
+  else {
+    res.status(404).json({ message: "Product not found" })
   }
 })
 
@@ -195,3 +245,4 @@ export {
   getProductByUserId,
   updateStatusOfProductActive
 };
+

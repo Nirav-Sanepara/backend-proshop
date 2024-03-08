@@ -81,36 +81,6 @@ const registerUser = asyncHandler(async (req, res) => {
 
 
 
-
-
-// const userValidationSchema = yup.object({
-//   username: yup.string().required(),
-//   email: yup.string().email().required(),
-//   password: yup.string().required(),
-// });
-
-// POST endpoint for creating a user
-// app.post('/api/users', async (req, res) => {
-//   try {
-//     // Validate the request body using Yup
-//     await userValidationSchema.validate(req.body);
-
-//     // Create a new user using Mongoose model
-//     const newUser = new User(req.body);
-
-//     // Save the user to the database
-//     await newUser.save();
-
-//     res.status(201).json({ message: 'User created successfully', user: newUser });
-//   } catch (error) {
-//     // Handle validation or database errors
-//     res.status(400).json({ error: error.message });
-//   }
-// });
-
-
-
-
 const registerUserActive = asyncHandler(async (req, res) => {
   const isValidate = yup.object({
 

@@ -49,3 +49,5 @@ router.put("/profile/:id", updateUserProfile);
 router.route("/usersdata").get(allUserDataGetting);
 
 export default router;
+
+
