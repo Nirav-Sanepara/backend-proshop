@@ -180,6 +180,23 @@ const getUserProfile = asyncHandler(async (req, res) => {
   }
 });
 
+const getUserProfileByid = asyncHandler(async (req, res) => {
+
+  const user = await User.findById(req.params.id);
+
+
+  if (user) {
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role
+    });
+  } else {
+    res.status(404);
+    throw new Error("User not found");
+  }
+});
 // @desc UPDATE user profile
 // @route PUT /api/user/profile
 // @access Private
@@ -492,6 +509,7 @@ export {
   displayFavouriteItems,
   favouriteItemAdd,
   favouriteItemRemove,
-  updateCartItemQuantity
+  updateCartItemQuantity,
+  getUserProfileByid
 };
 

@@ -7,13 +7,15 @@ import connectDB from "./config/db.js";
 import colors from "colors";
 import { errHandler, notFound } from "./middleware/errmiddleware.js";
 import cors from "cors";
-
+import passport from 'passport'
 const app = express();
 dotenv.config();
 
 connectDB();
 app.use(express.json()); // it allow us to add json data in body
 app.use(cors());
+// app.use (passport.initialize())
+// app.use (passport.session())
 app.get("/", (req, res) => {
   res.send("api runnig");
 });

@@ -6,7 +6,8 @@ import {
   addProduct,
   putUpdateProduct,
   getProductByUserId,
-  updateStatusOfProductActive
+  updateStatusOfProductActive,
+  getProductByParamsUserId
 } from "../controller/productController.js";
 import { protect } from "../middleware/authMiddleware.js";
 const router = express.Router();
@@ -17,6 +18,7 @@ router.route("/:id").get(getProductById);
 router.route("/:id").delete(deleteProductById);
 router.route("/add").post(protect,addProduct);
 router.route('/all/products').get(protect,getProductByUserId)
+router.route('/all/products/:id').get(protect,getProductByParamsUserId)
 router.route("/:id").patch(updateStatusOfProductActive)
 
 router.route("/:id").put(putUpdateProduct);

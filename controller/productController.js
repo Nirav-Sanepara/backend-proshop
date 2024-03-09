@@ -223,6 +223,24 @@ const getProductByUserId = asyncHandler(async (req, res) => {
   }
 });
 
+const getProductByParamsUserId = asyncHandler(async (req, res) => {
+
+  try {
+    const results = await Product.find({ user: req.params.id })
+    if (results) {
+      res.status(200).json(results)
+    }
+    else {
+      res.json("Results not found")
+    }
+  }
+  catch (err) {
+    console.log(err, 'error');
+    res.json('something went wrong')
+  }
+});
+
+
 const updateStatusOfProductActive = asyncHandler(async (req, res) => {
   const isExists = await Product.findById(req.params.id)
   if (isExists) {
@@ -243,6 +261,7 @@ export {
   addProduct,
   putUpdateProduct,
   getProductByUserId,
-  updateStatusOfProductActive
+  updateStatusOfProductActive,
+  getProductByParamsUserId
 };
 
