@@ -7,15 +7,14 @@ wss.on('connection',(socket)=>{
     socket.on('message', (msg) => {
      console.log("Received message: " + msg);
 
-     // Example condition: Check if the message is "requestProduct"
      if (msg == 'requestProduct') {
-         // Send a product-related message back to the client
+      
          socket.send('Here is the product information');
      } else if (msg == 'requestStatus') {
-         // Send a status-related message back to the client
+       
          socket.send('The server is up and running');
      } else {
-         // Handle other conditions or send a default message
+        
          socket.send('Unknown command');
      }
  });

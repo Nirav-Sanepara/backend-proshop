@@ -262,8 +262,8 @@ const addToCart = asyncHandler(async (req, res) => {
       _id: userId,
       "cartItems.product": productId,
     });
-    if (existingCartItem) {
-      // If the product already exists in the cart, update the quantity
+    if (existingCartItem && product.countInStock>quantity) {
+    
       await User.updateOne(
         {
           _id: userId,
@@ -277,7 +277,7 @@ const addToCart = asyncHandler(async (req, res) => {
         message: "Product added to cart successfully",
         product,
       });
-    } else {
+    } else if (!existingCartItem && product.countInStock>quantity) {
       // If the product is not in the cart, add it as a new item
       const cartItem = {
         product: product,
@@ -290,6 +290,9 @@ const addToCart = asyncHandler(async (req, res) => {
         message: "Product added to cart successfully",
         product: cartItem,
       });
+    }
+    else{
+      res.json({message:"Currently product is not available"})
     }
   } catch (error) {
     console.error(error);

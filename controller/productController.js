@@ -11,10 +11,7 @@ const getProducts = asyncHandler(async (req, res) => {
     user: { $in: activeUserIds },
   });
 
-  // let products = await Product.find({
-  //   creator: { $in: user: (await User.find({ isActive: true })).map(users => users._id) }, isActive: true,
-  // });
-  console.log(products, 'rammmmmmmmmmmmmmmmmmrammmmmmmmmmmmmmmmmmrammmmmmmmmmmmmm1111111111111111111111111111111111111111')
+
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
@@ -23,7 +20,7 @@ const getProducts = asyncHandler(async (req, res) => {
     const decode = jwt.verify(token, process.env.JWT_SECRET);
     req.user = await User.findById(decode.id).select("-password");
   }
-  // console.log("req.user", req.user);
+
   const favoriteProducts = req.user?.favoriteProducts?.map((ele) =>
     ele.product.toString()
   );
@@ -56,46 +53,6 @@ const getProducts = asyncHandler(async (req, res) => {
 
 });
 
-// const getProducts = asyncHandler(async (req, res) => {
-//   let products;
-
-//   // Check if the user is authenticated
-//   if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
-//     const token = req.headers.authorization.split(" ")[1];
-//     const decode = jwt.verify(token, process.env.JWT_SECRET);
-//     req.user = await User.findById(decode.id).select("-password");
-
-//     // Fetch products created by active users
-//     products = await Product.find({
-//       creator: { $in: (await User.find({ isActive: true })).map(user => user._id) },
-//     });
-//   } else {
-//     // If user is not authenticated, fetch all products
-//     products = await Product.find({});
-//   }
-
-//   // Check if the user is authenticated
-//   if (req.user) {
-//     const favoriteProducts = req.user.favoriteProducts?.map((ele) => ele.product.toString());
-
-//     // Modify products array to include isFavourite property
-//     products = products.map((prd) => ({
-//       ...prd.toObject(),
-//       isFavourite: favoriteProducts?.includes(prd._id.toString()),
-//     }));
-
-//     console.log(products,'ommmmmmmmmmmmmmmmmmmmmmmmmmmmmmm');
-//     res.json(products);
-//   } else {
-//     // If user is not authenticated, modify products array
-//     products = products.map((prd) => ({
-//       ...prd.toObject(),
-//       isFavorite: false,
-//     }));
-
-//     res.status(200).json(products);
-//   }
-// });
 
 
 const getProductById = asyncHandler(async (req, res) => {
@@ -253,6 +210,48 @@ const updateStatusOfProductActive = asyncHandler(async (req, res) => {
   }
 })
 
+const updateNumOfReviews = asyncHandler(async (req, res) => {
+   const product = await Product.findById(req.params.id)
+ 
+    const {rating} = req.body;
+   try{
+    if(product){
+      product.numReviews+=1
+      product.rating=rating
+
+      await product.save()
+       res.json({message:"Rating Updated Successfully", product})
+    }
+    else{
+      res.json({message: 'Product not found'})
+    }
+   }
+   catch(err){
+    res.json({error:err})
+   }
+})
+
+const addReviews = asyncHandler(async(req,res)=>{
+  const product = await Product.findById(req.params.id)
+ 
+    const {reviews} = req.body;
+   try{
+    if(product){
+    
+      product.reviews.push(reviews)
+
+      await product.save()
+       res.json({message:"Rating Updated Successfully", product})
+    }
+    else{
+      res.json({message: 'Product not found'})
+    }
+   }
+   catch(err){
+    res.json({error:err})
+   }
+})
+
 
 export {
   getProducts,
@@ -262,6 +261,8 @@ export {
   putUpdateProduct,
   getProductByUserId,
   updateStatusOfProductActive,
-  getProductByParamsUserId
+  getProductByParamsUserId,
+  updateNumOfReviews,
+  addReviews
 };
 

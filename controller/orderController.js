@@ -1,6 +1,7 @@
 import asyncHandler from "express-async-handler";
 import Order from "../models/orderModel.js";
 import User from "../models/userModel.js";
+import Product from "../models/productModel.js";
 
 // @desc Create new order
 //@route POST /api/orders
@@ -18,14 +19,23 @@ const addOrderItems = asyncHandler(async (req, res) => {
     shippingprice,
     totalPrice,
   } = req.body;
+  
+  const productData = await Product.findById(cartItems.product._id)
 
   if (cartItems && cartItems.length === 0) {
     res.status(400);
     throw new Error("No order items");
-  } else if(userExists.isActive==true) {
-    console.log(orderItems, "items");
+  } else if(userExists.isActive==true && productData.countInStock>=cartItems.quantity) {
+   
     const order = new Order({
-      orderItems:cartItems,
+      orderItems:{
+        name:cartItems.product.name,
+        qty:cartItems.quantity,
+        image:cartItems.product.image,
+        price:cartItems.product.price,
+        
+        product :cartItems.product._id
+      },
       user: req.user?._id,
       shippingAddress,
       paymentMethod,
@@ -39,7 +49,7 @@ const addOrderItems = asyncHandler(async (req, res) => {
     res.status(201).json(orderCreated);
   }
   else{
-    res.json({message:"Something went wrong please try again later or signup again"});
+    res.json({message:"Something went wrong please try again later"});
   }
 });
 
