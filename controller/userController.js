@@ -3,19 +3,21 @@ import User from "../models/userModel.js";
 import generateToken from "../utils/generateToken.js";
 import Product from '../models/productModel.js'
 import yup, { string } from 'yup';
+import passport from "passport";
+import { Strategy } from "passport-google-oauth20";
 
 // @desc Auth user and get token
 //@route POST /api/users/login
 //@access Public
 
 const authUser = asyncHandler(async (req, res) => {
-  const isValidate=yup.object({
-  email:yup.string().email().required(),
-  password:yup.string()
+  const isValidate = yup.object({
+    email: yup.string().email().required(),
+    password: yup.string()
   })
   const x = await isValidate.validate(req.body)
 
-  const user = await User.findOne({ email:x.email });
+  const user = await User.findOne({ email: x.email });
   console.log(user, "isActive data");
   if (user && user.isActive == true && (await user.matchPassword(x.password))) {
     const token = generateToken(user._id)
@@ -90,10 +92,15 @@ const registerUserActive = asyncHandler(async (req, res) => {
     role: yup.string()
 
   })
-const x= await isValidate.validate(req.body)
-//console.log(x,'request body ===============================================',isValidate,'yup validate =========================================');
-
-  const userExists = await User.findOne({ email:x.email });
+  const x = await isValidate.validate(req.body)
+  //console.log(x,'request body ===============================================',isValidate,'yup validate =========================================');
+  if (req.body.googleAccessToken) {
+    // Handle Google registration here
+    // You can access the user information from req.user
+    // Generate a token and send the response
+    res.status(200).json({ message: "Google signup successfull", user: req.user, token: generateToken(req.user._id) });
+  } 
+  const userExists = await User.findOne({ email: x.email });
 
 
   if (userExists && userExists.isActive == true) {
@@ -115,12 +122,12 @@ const x= await isValidate.validate(req.body)
 
 
 
-    
-   const newUser=new User(req.body)
-   newUser.isActive=true
-   await newUser.save()
+
+    const newUser = new User(req.body)
+    newUser.isActive = true
+    await newUser.save()
     if (newUser) {
-      
+
       res.status(201).json({
         _id: newUser._id,
         name: newUser.name,
@@ -139,7 +146,36 @@ const x= await isValidate.validate(req.body)
     res.json({ message: "Something went wrong please try again later" })
   }
 
- });
+});
+
+const registerWithGoogle = asyncHandler(async (req, res) => {
+  passport.use(new GoogleStrategy({
+    clientID: '383198814159-i6becmdphkpnq2b2kj94k6g6vqpu7avk.apps.googleusercontent.com',
+    clientSecret: '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',
+    callbackURL: 'http://localhost:3000/auth/google/callback',
+  },
+    async (accessToken, refreshToken, profile, done) => {
+      // Check if the user already exists in the database
+      const userExists = await User.findOne({ email: profile.emails[0].value });
+
+      if (userExists) {
+        // If the user exists, generate a token and send a response
+        return done(null, userExists);
+      } else {
+        // If the user doesn't exist, create a new user and save it to the database
+        const newUser = new User({
+          name: profile.displayName,
+          email: profile.emails[0].value,
+          password,
+          isActive: true, // You can set the default value as needed
+        });
+
+        await newUser.save();
+       res.json({message:"Signup successfully", newUser})
+      }
+    }
+  ));
+})
 
 // // @@ Soft delete user with isActive info
 
@@ -149,7 +185,7 @@ const userProfileSoftDelete = asyncHandler(async (req, res) => {
   try {
     if (user) {
 
-      res.status(200).json({ message: 'Account deleted Successfully',user })
+      res.status(200).json({ message: 'Account deleted Successfully', user })
     }
   }
   catch (err) {
@@ -262,8 +298,8 @@ const addToCart = asyncHandler(async (req, res) => {
       _id: userId,
       "cartItems.product": productId,
     });
-    if (existingCartItem && product.countInStock>quantity) {
-    
+    if (existingCartItem && product.countInStock > quantity) {
+
       await User.updateOne(
         {
           _id: userId,
@@ -277,7 +313,7 @@ const addToCart = asyncHandler(async (req, res) => {
         message: "Product added to cart successfully",
         product,
       });
-    } else if (!existingCartItem && product.countInStock>quantity) {
+    } else if (!existingCartItem && product.countInStock > quantity) {
       // If the product is not in the cart, add it as a new item
       const cartItem = {
         product: product,
@@ -291,8 +327,8 @@ const addToCart = asyncHandler(async (req, res) => {
         product: cartItem,
       });
     }
-    else{
-      res.json({message:"Currently product is not available"})
+    else {
+      res.json({ message: "Currently product is not available" })
     }
   } catch (error) {
     console.error(error);

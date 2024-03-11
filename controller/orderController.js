@@ -20,22 +20,15 @@ const addOrderItems = asyncHandler(async (req, res) => {
     totalPrice,
   } = req.body;
   
-  const productData = await Product.findById(cartItems.product._id)
+ // const productData = await Product.findById(cartItems._id)
 
   if (cartItems && cartItems.length === 0) {
     res.status(400);
     throw new Error("No order items");
-  } else if(userExists.isActive==true && productData.countInStock>=cartItems.quantity) {
+  } else if(userExists.isActive==true ) {
    
     const order = new Order({
-      orderItems:{
-        name:cartItems.product.name,
-        qty:cartItems.quantity,
-        image:cartItems.product.image,
-        price:cartItems.product.price,
-        
-        product :cartItems.product._id
-      },
+      orderItems:cartItems,
       user: req.user?._id,
       shippingAddress,
       paymentMethod,
