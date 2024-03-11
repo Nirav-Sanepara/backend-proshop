@@ -9,11 +9,15 @@ import yup, { string } from 'yup';
 //@access Public
 
 const authUser = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
+  const isValidate=yup.object({
+  email:yup.string().email().required(),
+  password:yup.string()
+  })
+  const x = await isValidate.validate(req.body)
 
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email:x.email });
   console.log(user, "isActive data");
-  if (user && user.isActive == true && (await user.matchPassword(password))) {
+  if (user && user.isActive == true && (await user.matchPassword(x.password))) {
     const token = generateToken(user._id)
     console.log('token get ---- ', token);
     res.json({
@@ -77,36 +81,6 @@ const registerUser = asyncHandler(async (req, res) => {
 
 
 
-
-
-// const userValidationSchema = yup.object({
-//   username: yup.string().required(),
-//   email: yup.string().email().required(),
-//   password: yup.string().required(),
-// });
-
-// POST endpoint for creating a user
-// app.post('/api/users', async (req, res) => {
-//   try {
-//     // Validate the request body using Yup
-//     await userValidationSchema.validate(req.body);
-
-//     // Create a new user using Mongoose model
-//     const newUser = new User(req.body);
-
-//     // Save the user to the database
-//     await newUser.save();
-
-//     res.status(201).json({ message: 'User created successfully', user: newUser });
-//   } catch (error) {
-//     // Handle validation or database errors
-//     res.status(400).json({ error: error.message });
-//   }
-// });
-
-
-
-
 const registerUserActive = asyncHandler(async (req, res) => {
   const isValidate = yup.object({
 
@@ -117,7 +91,7 @@ const registerUserActive = asyncHandler(async (req, res) => {
 
   })
 const x= await isValidate.validate(req.body)
-console.log(x,'request body ===============================================',isValidate);
+//console.log(x,'request body ===============================================',isValidate,'yup validate =========================================');
 
   const userExists = await User.findOne({ email:x.email });
 
@@ -175,7 +149,7 @@ const userProfileSoftDelete = asyncHandler(async (req, res) => {
   try {
     if (user) {
 
-      res.status(200).json({ message: 'Account deleted Successfully' })
+      res.status(200).json({ message: 'Account deleted Successfully',user })
     }
   }
   catch (err) {
@@ -206,6 +180,23 @@ const getUserProfile = asyncHandler(async (req, res) => {
   }
 });
 
+const getUserProfileByid = asyncHandler(async (req, res) => {
+
+  const user = await User.findById(req.params.id);
+
+
+  if (user) {
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role
+    });
+  } else {
+    res.status(404);
+    throw new Error("User not found");
+  }
+});
 // @desc UPDATE user profile
 // @route PUT /api/user/profile
 // @access Private
@@ -238,7 +229,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 const allUserDataGetting = asyncHandler(async (req, res) => {
 
   try {
-    let results = await User.find({})
+    let results = await User.find()
 
     res.json(results)
   }
@@ -271,8 +262,8 @@ const addToCart = asyncHandler(async (req, res) => {
       _id: userId,
       "cartItems.product": productId,
     });
-    if (existingCartItem) {
-      // If the product already exists in the cart, update the quantity
+    if (existingCartItem && product.countInStock>quantity) {
+    
       await User.updateOne(
         {
           _id: userId,
@@ -286,7 +277,7 @@ const addToCart = asyncHandler(async (req, res) => {
         message: "Product added to cart successfully",
         product,
       });
-    } else {
+    } else if (!existingCartItem && product.countInStock>quantity) {
       // If the product is not in the cart, add it as a new item
       const cartItem = {
         product: product,
@@ -299,6 +290,9 @@ const addToCart = asyncHandler(async (req, res) => {
         message: "Product added to cart successfully",
         product: cartItem,
       });
+    }
+    else{
+      res.json({message:"Currently product is not available"})
     }
   } catch (error) {
     console.error(error);
@@ -518,6 +512,7 @@ export {
   displayFavouriteItems,
   favouriteItemAdd,
   favouriteItemRemove,
-  updateCartItemQuantity
+  updateCartItemQuantity,
+  getUserProfileByid
 };
 

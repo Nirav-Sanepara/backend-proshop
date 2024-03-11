@@ -5,7 +5,7 @@ const { Schema } = mongoose;
 const reviewSchema = mongoose.Schema(
   {
     name: { type: String, required: true },
-    rating: { type: Number, required: true },
+    rating: { type: Number, required: false},
     comment: { type: String, required: true },
   },
   {

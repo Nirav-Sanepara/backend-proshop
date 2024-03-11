@@ -7,13 +7,14 @@ import connectDB from "./config/db.js";
 import colors from "colors";
 import { errHandler, notFound } from "./middleware/errmiddleware.js";
 import cors from "cors";
-
+import passport from 'passport'
 const app = express();
 dotenv.config();
 
 connectDB();
 app.use(express.json()); // it allow us to add json data in body
 app.use(cors());
+
 app.get("/", (req, res) => {
   res.send("api runnig");
 });
@@ -24,7 +25,7 @@ app.use("/api/orders", orderRoutes);
 
 // app.use(notFound);
 // app.use(errHandler);  api/'products/myproducts
-//http://localhost:3001/api/users/usersdata
+
 const PORT = process.env.PORT || 5000;
 
 
