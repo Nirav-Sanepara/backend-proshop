@@ -7,7 +7,7 @@ import User from "../models/userModel.js";
 //@access Private
 
 const addOrderItems = asyncHandler(async (req, res) => {
-  console.log("req.body", req.body);
+  console.log("req.body of the order  we placed ", req.body);
   const userExists=await User.findById({_id:req.user?._id,})
   const {
     cartItems,

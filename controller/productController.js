@@ -146,9 +146,10 @@ const updateProductCountInStock = asyncHandler(async (req, res) => {
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
+
+      product.countInStock -= quantity;
+      await product.save();
     
-    product.countInStock -= quantity;
-    await product.save();
 
     res.status(200).json({ message: "Product count in stock updated", updatedProduct: product });
   } catch (error) {
