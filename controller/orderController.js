@@ -8,7 +8,7 @@ import Product from "../models/productModel.js";
 //@access Private
 
 const addOrderItems = asyncHandler(async (req, res) => {
-  console.log("req.body of the order  we placed ", req.body);
+ 
   const userExists=await User.findById({_id:req.user?._id,})
   const {
     cartItems,
@@ -20,22 +20,18 @@ const addOrderItems = asyncHandler(async (req, res) => {
     totalPrice,
   } = req.body;
   
-  const productData = await Product.findById(cartItems.product._id)
+  const productData = await Product.findById(cartItems._id)
 
+  console.log(cartItems ," dsifjdkfjsdfldsgjdflgjdflgndfknsxfnsofjfosfjmndkvs ", productData, "  adhiudhid sadh dhsak dhsakd hsak ")
   if (cartItems && cartItems.length === 0) {
     res.status(400);
     throw new Error("No order items");
-  } else if(userExists.isActive==true && productData.countInStock>=cartItems.quantity) {
+  } else if(userExists.isActive==true ) {
    
+
     const order = new Order({
-      orderItems:{
-        name:cartItems.product.name,
-        qty:cartItems.quantity,
-        image:cartItems.product.image,
-        price:cartItems.product.price,
-        
-        product :cartItems.product._id
-      },
+      orderItems:cartItems,
+
       user: req.user?._id,
       shippingAddress,
       paymentMethod,

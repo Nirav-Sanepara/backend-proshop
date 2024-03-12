@@ -151,6 +151,9 @@ const putUpdateProduct = asyncHandler(async (req, res) => {
       updates.forEach((update) => (product[update] = req.body[update]));
       await product.save();
 
+      io.emit('productUpdated', product);
+
+
       res.status(200).json({ message: "Product update successfully", product });
     } else {
       res.status(404).json({ message: "Product not found" });
@@ -254,11 +257,14 @@ const updateNumOfReviews = asyncHandler(async (req, res) => {
 const addReviews = asyncHandler(async(req,res)=>{
   const product = await Product.findById(req.params.id)
  
-    const {reviews} = req.body;
+    const {name, comment} = req.body;
+    const review = {
+      name , comment
+    }
    try{
     if(product){
     
-      product.reviews.push(reviews)
+      product.reviews.push(review)
 
       await product.save()
        res.json({message:"Rating Updated Successfully", product})
@@ -283,6 +289,7 @@ export {
   updateStatusOfProductActive,
   getProductByParamsUserId,
   updateNumOfReviews,
-  addReviews
+  addReviews,
+  updateProductCountInStock
 };
 

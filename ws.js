@@ -21,10 +21,6 @@ wss.on('connection',(socket)=>{
 });
 
 console.log('waiting for connection');
-// web socket started but still lots of work left.
-//basic fundamental created just need to think how to implemented from frontend
-//and one more thing how to deploy backend web_socket 
-
 
 
 // frontend code 

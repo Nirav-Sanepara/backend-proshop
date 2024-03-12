@@ -8,9 +8,14 @@ import colors from "colors";
 import { errHandler, notFound } from "./middleware/errmiddleware.js";
 import cors from "cors";
 import passport from 'passport'
+import http from "http";
+
+import {Server} from "socket.io";
+
 const app = express();
 dotenv.config();
-
+const server = http.createServer(app);
+const io = new Server(server);
 connectDB();
 app.use(express.json()); // it allow us to add json data in body
 app.use(cors());
@@ -30,10 +35,11 @@ const PORT = process.env.PORT || 5000;
 
 
 
-app.listen(
+server.listen(
   PORT,
   console.log(
     `Server running in ${process.env.NODE_ENV} on ${process.env.PORT}`.yellow
       .bold
   )
 );
+

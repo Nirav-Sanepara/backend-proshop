@@ -8,7 +8,9 @@ import {
   getProductByUserId,
   updateStatusOfProductActive,
   getProductByParamsUserId,
-  updateNumOfReviews
+  updateNumOfReviews,
+  updateProductCountInStock,
+  addReviews,
 } from "../controller/productController.js";
 import { protect } from "../middleware/authMiddleware.js";
 
@@ -21,9 +23,10 @@ router.route("/add").post(protect,addProduct);
 router.route('/all/products').get(protect,getProductByUserId)
 router.route('/all/products/:id').get(protect,getProductByParamsUserId)
 router.route("/:id").patch(updateStatusOfProductActive)
-router.route('/reting/:id').patch(protect, updateNumOfReviews)
+router.route('/rating/:id').patch(protect, updateNumOfReviews)
 router.route("/:id").put(putUpdateProduct);
 router.route("/updateCount/:id").patch(updateProductCountInStock);
+router.route("/addReview/:id").patch(addReviews);
 
 export default router;
 
