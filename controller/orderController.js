@@ -28,7 +28,6 @@ const addOrderItems = asyncHandler(async (req, res) => {
     throw new Error("No order items");
   } else if(userExists.isActive==true ) {
    
-
     const order = new Order({
       orderItems:cartItems,
 

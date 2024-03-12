@@ -58,7 +58,7 @@ const getProducts = asyncHandler(async (req, res) => {
 
 const getProductById = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id);
-  console.log(product, "products");
+  console.log(product, 'products');
   if (product) {
     res.json(product);
   } else {
@@ -108,8 +108,9 @@ const addProduct = asyncHandler(async (req, res) => {
 
   
   const createdProduct = await products.save();
-  res.status(201).json({message:"Product added successfully",createdProduct});
-  console.log(createdProduct, "response getting from add request");
+  res.status(201).json({ message: "Product added successfully", createdProduct });
+ 
+
 });
 
 // @desc update product
@@ -119,7 +120,8 @@ const addProduct = asyncHandler(async (req, res) => {
 const putUpdateProduct = asyncHandler(async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-    console.log(product, 'product put request-------------------------');
+   
+    
     if (product) {
       const updates = Object.keys(req.body);
       const allowedUpdates = [
@@ -139,11 +141,9 @@ const putUpdateProduct = asyncHandler(async (req, res) => {
       const isValidOperation = updates.every((update) => {
         return allowedUpdates.includes(update);
       });
-      console.log(
-        updates, 'req body 7777777777777777777777777777777'
-      );
+     
       if (!isValidOperation) {
-        console.log(isValidOperation, 'iaValidOperation=============');
+        
         return res
           .status(400)
           .json({ status: "fail", message: "Invalid updates" });
@@ -198,7 +198,7 @@ const getProductByUserId = asyncHandler(async (req, res) => {
     }
   }
   catch (err) {
-    console.log(err, 'error');
+  
     res.json('something went wrong')
   }
 });
@@ -215,7 +215,7 @@ const getProductByParamsUserId = asyncHandler(async (req, res) => {
     }
   }
   catch (err) {
-    console.log(err, 'error');
+   
     res.json('something went wrong')
   }
 });
