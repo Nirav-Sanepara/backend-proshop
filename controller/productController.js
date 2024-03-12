@@ -242,7 +242,7 @@ const updateNumOfReviews = asyncHandler(async (req, res) => {
     const {rating} = req.body;
    try{
     if(product){
-      product.numReviews+=1
+      product.numReviews+=rating
       product.rating=rating
 
       await product.save()
