@@ -2,6 +2,8 @@ import asyncHandler from "express-async-handler";
 import Product from "../models/productModel.js";
 import jwt from "jsonwebtoken";
 import User from "../models/userModel.js";
+import createSocketServer from "../utils/socket.js";
+const {io, server}=createSocketServer()
 const getProducts = asyncHandler(async (req, res) => {
   //const products = await Product.find({});
   const activeUserIds = (await User.find({ isActive: true })).map(user => user._id);
@@ -159,6 +161,7 @@ const putUpdateProduct = asyncHandler(async (req, res) => {
       res.status(404).json({ message: "Product not found" });
     }
   } catch (error) {
+    console.log(error , 'update product error')
     res.status(400).json({ message: "Product update failed", error });
   }
 });

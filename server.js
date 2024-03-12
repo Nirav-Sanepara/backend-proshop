@@ -7,23 +7,16 @@ import connectDB from "./config/db.js";
 import colors from "colors";
 import { errHandler, notFound } from "./middleware/errmiddleware.js";
 import cors from "cors";
-import passport from 'passport'
-import http from "http";
 
-import {Server} from "socket.io";
+// Import the modified createSocketServer function
+import createSocketServer from "./utils/socket.js";
 
 const app = express();
 dotenv.config();
-const server = http.createServer(app);
-const io = new Server(server);
+
 connectDB();
 app.use(express.json()); // it allow us to add json data in body
 app.use(cors());
-
-app.get("/", (req, res) => {
-  res.send("api runnig");
-});
-
 app.use("/api/products", productRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/orders", orderRoutes);
@@ -33,7 +26,12 @@ app.use("/api/orders", orderRoutes);
 
 const PORT = process.env.PORT || 5000;
 
+// Call createSocketServer and pass 'app' as a parameter
+const { io, server } = createSocketServer(app);
 
+app.get("/", (req, res) => {
+  res.send("api running");
+});
 
 server.listen(
   PORT,
@@ -42,4 +40,3 @@ server.listen(
       .bold
   )
 );
-
