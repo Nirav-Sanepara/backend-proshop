@@ -18,10 +18,10 @@ const authUser = asyncHandler(async (req, res) => {
   const x = await isValidate.validate(req.body)
 
   const user = await User.findOne({ email: x.email });
-  console.log(user, "isActive data");
+ 
   if (user && user.isActive == true && (await user.matchPassword(x.password))) {
     const token = generateToken(user._id)
-    console.log('token get ---- ', token);
+  
     res.json({
       _id: user._id,
       name: user.name,
@@ -41,10 +41,10 @@ const authUser = asyncHandler(async (req, res) => {
 
 const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
-  console.log('inside signup request', req.body);
+  
   const userExists = await User.findOne({ email });
 
-  console.log('userExists checking', userExists);
+
   if (userExists && userExists.isActive == true) {
     res.status(404).json({ message: "User already exists" });
     // throw new Error("User already exists");
@@ -58,7 +58,7 @@ const registerUser = asyncHandler(async (req, res) => {
       password,
       isActive: true
     });
-    console.log(user, 'user signup');
+  
     if (user) {
       const token = generateToken(user._id)
 
@@ -93,7 +93,7 @@ const registerUserActive = asyncHandler(async (req, res) => {
 
   })
   const x = await isValidate.validate(req.body)
-  //console.log(x,'request body ===============================================',isValidate,'yup validate =========================================');
+
   if (req.body.googleAccessToken) {
     // Handle Google registration here
     // You can access the user information from req.user
@@ -367,7 +367,7 @@ const displayCartItems = asyncHandler(async (req, res) => {
 
       res.status(200).json(cartItems);
     } else {
-      console.log("User not found");
+      res.send("User not found");
     }
   } catch (error) {
     res.status(500).json("Internal server error");
@@ -523,10 +523,10 @@ const displayFavouriteItems = asyncHandler(async (req, res) => {
     );;
     if (user) {
       const cartItems = user.favoriteProducts;
-      console.log(cartItems);
+      
       res.status(200).json(cartItems)
     } else {
-      console.log('User not found');
+    res.send('User not found');
     }
   } catch (error) {
     res.status(500).json('Internal server error')
