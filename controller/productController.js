@@ -258,6 +258,8 @@ const addReviews = asyncHandler(async (req, res) => {
     rating,
   };
 
+  console.log(req.body , " ppppppppppppppppppppppp  ")
+
   try {
     if (product) {
       const existingReviewIndex = product.reviews.findIndex(
@@ -265,7 +267,6 @@ const addReviews = asyncHandler(async (req, res) => {
       );
 
       if (existingReviewIndex !== -1) {
-   
         product.numReviews += rating - product.reviews[existingReviewIndex].rating;
         product.reviews[existingReviewIndex] = review;
       } else {
