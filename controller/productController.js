@@ -3,16 +3,17 @@ import Product from "../models/productModel.js";
 import jwt from "jsonwebtoken";
 import User from "../models/userModel.js";
 import createSocketServer from "../utils/socket.js";
-const {io, server}=createSocketServer()
+const { io, server } = createSocketServer();
 const getProducts = asyncHandler(async (req, res) => {
   //const products = await Product.find({});
-  const activeUserIds = (await User.find({ isActive: true })).map(user => user._id);
+  const activeUserIds = (await User.find({ isActive: true })).map(
+    (user) => user._id
+  );
 
   var products = await Product.find({
     isActive: true,
     user: { $in: activeUserIds },
   });
-
 
   if (
     req.headers.authorization &&
@@ -23,7 +24,6 @@ const getProducts = asyncHandler(async (req, res) => {
     req.user = await User.findById(decode.id).select("-password");
   }
 
-
   const favoriteProducts = req.user?.favoriteProducts?.map((ele) =>
     ele.product.toString()
   );
@@ -33,34 +33,23 @@ const getProducts = asyncHandler(async (req, res) => {
       return {
         ...prd.toObject(),
         isFavourite: favoriteProducts?.includes(prd._id.toString()),
-
       };
     });
 
-
-
-    res.json(products)
-  }
-  else {
+    res.json(products);
+  } else {
     products = products.map((prd) => ({
       ...prd.toObject(),
       isFavorite: false,
     }));
 
-
     res.status(200).json(products);
   }
-
-
-
-
 });
-
-
 
 const getProductById = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id);
-  console.log(product, 'products');
+  console.log(product, "products");
   if (product) {
     res.json(product);
   } else {
@@ -93,8 +82,17 @@ const deleteProductById = asyncHandler(async (req, res) => {
 //@access Private
 
 const addProduct = asyncHandler(async (req, res) => {
-  const { name, price, image, category, description, brand, countInStock, user, isActive } =
-    req.body;
+  const {
+    name,
+    price,
+    image,
+    category,
+    description,
+    brand,
+    countInStock,
+    user,
+    isActive,
+  } = req.body;
 
   const products = new Product({
     name,
@@ -104,15 +102,14 @@ const addProduct = asyncHandler(async (req, res) => {
     description,
     brand,
     countInStock,
-    user : req.user._id,
-    isActive
+    user: req.user._id,
+    isActive,
   });
 
-  
   const createdProduct = await products.save();
-  res.status(201).json({ message: "Product added successfully", createdProduct });
- 
-
+  res
+    .status(201)
+    .json({ message: "Product added successfully", createdProduct });
 });
 
 // @desc update product
@@ -122,8 +119,7 @@ const addProduct = asyncHandler(async (req, res) => {
 const putUpdateProduct = asyncHandler(async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-   
-    
+
     if (product) {
       const updates = Object.keys(req.body);
       const allowedUpdates = [
@@ -138,14 +134,13 @@ const putUpdateProduct = asyncHandler(async (req, res) => {
         "numReviews",
         "price",
         "countInStock",
-        "isActive"
+        "isActive",
       ];
       const isValidOperation = updates.every((update) => {
         return allowedUpdates.includes(update);
       });
-     
+
       if (!isValidOperation) {
-        
         return res
           .status(400)
           .json({ status: "fail", message: "Invalid updates" });
@@ -153,15 +148,14 @@ const putUpdateProduct = asyncHandler(async (req, res) => {
       updates.forEach((update) => (product[update] = req.body[update]));
       await product.save();
 
-      io.emit('productUpdated', product);
-
+      io.emit("productUpdated", product);
 
       res.status(200).json({ message: "Product update successfully", product });
     } else {
       res.status(404).json({ message: "Product not found" });
     }
   } catch (error) {
-    console.log(error , 'update product error')
+    console.log(error, "update product error");
     res.status(400).json({ message: "Product update failed", error });
   }
 });
@@ -174,13 +168,19 @@ const updateProductCountInStock = asyncHandler(async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-      product.countInStock -= quantity;
-      await product.save();
-    
+    product.countInStock -= quantity;
+    await product.save();
 
-    res.status(200).json({ message: "Product count in stock updated", updatedProduct: product });
+    res
+      .status(200)
+      .json({
+        message: "Product count in stock updated",
+        updatedProduct: product,
+      });
   } catch (error) {
-    res.status(400).json({ message: "Failed to update product count in stock", error });
+    res
+      .status(400)
+      .json({ message: "Failed to update product count in stock", error });
   }
 });
 
@@ -188,62 +188,53 @@ const updateProductCountInStock = asyncHandler(async (req, res) => {
 //All product that created by one user
 //private
 
-
 const getProductByUserId = asyncHandler(async (req, res) => {
-
   try {
-    const results = await Product.find({ user: req.user._id })
+    const results = await Product.find({ user: req.user._id });
     if (results) {
-      res.status(200).json(results)
+      res.status(200).json(results);
+    } else {
+      res.json("Results not found");
     }
-    else {
-      res.json("Results not found")
-    }
-  }
-  catch (err) {
-  
-    res.json('something went wrong')
+  } catch (err) {
+    res.json("something went wrong");
   }
 });
 
 const getProductByParamsUserId = asyncHandler(async (req, res) => {
-
   try {
-    const results = await Product.find({ user: req.params.id })
+    const results = await Product.find({ user: req.params.id });
     if (results) {
-      res.status(200).json(results)
+      res.status(200).json(results);
+    } else {
+      res.json("Results not found");
     }
-    else {
-      res.json("Results not found")
-    }
-  }
-  catch (err) {
-   
-    res.json('something went wrong')
+  } catch (err) {
+    res.json("something went wrong");
   }
 });
 
-
 const updateStatusOfProductActive = asyncHandler(async (req, res) => {
-  const isExists = await Product.findById(req.params.id)
+  const isExists = await Product.findById(req.params.id);
   if (isExists) {
-    isExists.isActive = !isExists.isActive
-    isExists.save()
-    res.status(200).json({ message: "Product status changed successfully", isExists })
+    isExists.isActive = !isExists.isActive;
+    isExists.save();
+    res
+      .status(200)
+      .json({ message: "Product status changed successfully", isExists });
+  } else {
+    res.status(404).json({ message: "Product not found" });
   }
-  else {
-    res.status(404).json({ message: "Product not found" })
-  }
-})
+});
 
 const updateNumOfReviews = asyncHandler(async (req, res) => {
    const product = await Product.findById(req.params.id)
- 
+
     const {rating} = req.body;
    try{
     if(product){
-      product.numReviews+=1
-      product.rating=rating
+      product.numReviews+=rating
+      const usersReview=//product.rating=rating
 
       await product.save()
        res.json({message:"Rating Updated Successfully", product})
@@ -257,29 +248,42 @@ const updateNumOfReviews = asyncHandler(async (req, res) => {
    }
 })
 
-const addReviews = asyncHandler(async(req,res)=>{
-  const product = await Product.findById(req.params.id)
- 
-    const {name, comment} = req.body;
-    const review = {
-      name , comment
-    }
-   try{
-    if(product){
-    
-      product.reviews.push(review)
+const addReviews = asyncHandler(async (req, res) => {
+  const product = await Product.findById(req.params.id);
 
-      await product.save()
-       res.json({message:"Rating Updated Successfully", product})
+  const { name, comment, rating } = req.body;
+  const review = {
+    name,
+    comment,
+    rating,
+  };
+
+  try {
+    if (product) {
+      const existingReviewIndex = product.reviews.findIndex(
+        (rev) => rev.name === name
+      );
+
+      if (existingReviewIndex !== -1) {
+   
+        product.numReviews += rating - product.reviews[existingReviewIndex].rating;
+        product.reviews[existingReviewIndex] = review;
+      } else {
+
+        product.numReviews += rating;
+        product.reviews.push(review);
+      }
+
+      product.rating = Math.floor(product.numReviews / product.reviews.length);
+      await product.save();
+      res.json({ message: "Rating Updated Successfully", product });
+    } else {
+      res.json({ message: "Product not found" });
     }
-    else{
-      res.json({message: 'Product not found'})
-    }
-   }
-   catch(err){
-    res.json({error:err})
-   }
-})
+  } catch (err) {
+    res.json({ error: err });
+  }
+});
 
 
 export {
@@ -293,6 +297,5 @@ export {
   getProductByParamsUserId,
   updateNumOfReviews,
   addReviews,
-  updateProductCountInStock
+  updateProductCountInStock,
 };
-
