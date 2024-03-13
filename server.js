@@ -7,7 +7,7 @@ import connectDB from "./config/db.js";
 import colors from "colors";
 import { errHandler, notFound } from "./middleware/errmiddleware.js";
 import cors from "cors";
-
+import passport from "./controller/googleAuthController.js";
 // Import the modified createSocketServer function
 import createSocketServer from "./utils/socket.js";
 
@@ -20,7 +20,7 @@ app.use(cors());
 app.use("/api/products", productRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/orders", orderRoutes);
-
+app.use(passport.initialize());
 // app.use(notFound);
 // app.use(errHandler);  api/'products/myproducts
 
