@@ -7,7 +7,7 @@ import User from "../models/userModel.js";
 passport.use(new GoogleStrategy({
     clientID: '383198814159-i6becmdphkpnq2b2kj94k6g6vqpu7avk.apps.googleusercontent.com',
     clientSecret: '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',
-    callbackURL: 'http://localhost:3000/auth/google/callback',
+    callbackURL: 'http://localhost:3001/auth/google/callback',
   },
   async (accessToken, refreshToken, profile, done) => {
     // Check if the user already exists in the database

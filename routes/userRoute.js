@@ -25,8 +25,8 @@ const router = express.Router();
 
 router.route("/").post(registerUserActive);
 router.post("/login", authUser);
-//router.patch('/:_id',protect,registerUserActive) //change done
-router.put('/:id',protect,userProfileSoftDelete) //change done
+ 
+router.put('/:id',protect,userProfileSoftDelete) 
 router.get('/cartlist',protect,displayCartItems)
 router.get('/favouritelist',protect,displayFavouriteItems)
 router.post('/addTocart',protect,addToCart)

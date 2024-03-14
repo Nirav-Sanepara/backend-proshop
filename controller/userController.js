@@ -220,6 +220,15 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     });
   } else {
     res.status(404).json({ message: "User not found" });
+
+    // {
+    //   status: 200,
+    //   message:"",
+    //   data:
+    // }
+
+    // return common(CON.NOT_FOUND,CON.NOT_FOUND_MSG('User'), null)
+    // return common(CON.SUCCESS,CON.SUCCESS_MSG('User'), data)
   }
 });
 
@@ -258,22 +267,31 @@ const addToCart = asyncHandler(async (req, res) => {
       _id: userId,
       "cartItems.product": productId,
     });
-    if (existingCartItem && product.countInStock >= existingCartItem.quantity) {
-      await User.updateOne(
-        {
-          _id: userId,
-          "cartItems.product": productId,
-        },
-        {
-          $inc: { "cartItems.$.quantity": quantity },
+    if (existingCartItem ) {
+      
+        for(let i=0; i<existingCartItem?.cartItems?.length; i++){
+            if(product.countInStock>existingCartItem.cartItems[i].quantity){
+              await User.updateOne(
+                {
+                  _id: userId,
+                  "cartItems.product": productId,
+                },
+                {
+                  $inc: { "cartItems.$.quantity": quantity },
+                }
+              );
+              res.status(200).json({
+                message: "Product quantity increase successfully",
+                product,
+              });
+            }
+            else {
+              res.json({ message: "Currently product is not available" });
+            }
         }
-      );
-      res.status(200).json({
-        message: "Product added to cart successfully",
-        product,
-      });
-    } else if (!existingCartItem && product.countInStock > quantity) {
-      // If the product is not in the cart, add it as a new item
+      
+    } else if (!existingCartItem && product.countInStock >= quantity) {
+   
       const cartItem = {
         product: product,
         quantity: quantity,
@@ -285,7 +303,8 @@ const addToCart = asyncHandler(async (req, res) => {
         message: "Product added to cart successfully",
         product: cartItem,
       });
-    } else {
+    } 
+    else {
       res.json({ message: "Currently product is not available" });
     }
   } catch (error) {

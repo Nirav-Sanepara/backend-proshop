@@ -3,16 +3,23 @@ import Product from "../models/productModel.js";
 import jwt from "jsonwebtoken";
 import User from "../models/userModel.js";
 import createSocketServer from "../utils/socket.js";
+
+import {
+  COM_NOT_FOUND_MESSAGE,
+  COMMON_NOT_FOUND_CODE,
+  COMMON_SUCCESS_GET_CODE
+} from '../statusCodeResponse/index.js'
+
+
 const {io, server}=createSocketServer()
+
 const getProducts = asyncHandler(async (req, res) => {
   //const products = await Product.find({});
   const activeUserIds = (await User.find({ isActive: true })).map(user => user._id);
-
   var products = await Product.find({
     isActive: true,
     user: { $in: activeUserIds },
   });
-
 
   if (
     req.headers.authorization &&
@@ -22,7 +29,6 @@ const getProducts = asyncHandler(async (req, res) => {
     const decode = jwt.verify(token, process.env.JWT_SECRET);
     req.user = await User.findById(decode.id).select("-password");
   }
-
 
   const favoriteProducts = req.user?.favoriteProducts?.map((ele) =>
     ele.product.toString()
@@ -37,9 +43,7 @@ const getProducts = asyncHandler(async (req, res) => {
       };
     });
 
-
-
-    res.json(products)
+    res.status(COMMON_SUCCESS_GET_CODE).json(products)
   }
   else {
     products = products.map((prd) => ({
@@ -48,11 +52,8 @@ const getProducts = asyncHandler(async (req, res) => {
     }));
 
 
-    res.status(200).json(products);
+    res.status(COMMON_SUCCESS_GET_CODE).json(products);
   }
-
-
-
 
 });
 
@@ -60,11 +61,11 @@ const getProducts = asyncHandler(async (req, res) => {
 
 const getProductById = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id);
-  console.log(product, 'products');
+
   if (product) {
     res.json(product);
   } else {
-    res.status(404).json({ message: "Product not found" });
+    res.status(COMMON_NOT_FOUND_CODE).json({ message: COM_NOT_FOUND_MESSAGE("Product") });
   }
 });
 
@@ -76,7 +77,7 @@ const deleteProductById = asyncHandler(async (req, res) => {
       _id: req.params.id,
     });
     if (deleteProduct) {
-      res.status(200).json({
+      res.status(COMMON_SUCCESS_GET_CODE).json({
         message: "Product deleted successfully",
         product: deleteProduct,
       });
@@ -84,7 +85,7 @@ const deleteProductById = asyncHandler(async (req, res) => {
       res.status(500).json("couldn't delete product");
     }
   } else {
-    res.status(404).json({ message: "Product not found" });
+    res.status(COMMON_NOT_FOUND_CODE).json({ message: COM_NOT_FOUND_MESSAGE("Product") });
   }
 });
 
@@ -156,9 +157,9 @@ const putUpdateProduct = asyncHandler(async (req, res) => {
       io.emit('productUpdated', product);
 
 
-      res.status(200).json({ message: "Product update successfully", product });
+      res.status(COMMON_SUCCESS_GET_CODE).json({ message: "Product update successfully", product });
     } else {
-      res.status(404).json({ message: "Product not found" });
+      res.status(COMMON_NOT_FOUND_CODE).json({ message: COM_NOT_FOUND_MESSAGE("Product")});
     }
   } catch (error) {
     console.log(error , 'update product error')
@@ -178,7 +179,7 @@ const updateProductCountInStock = asyncHandler(async (req, res) => {
       await product.save();
     
 
-    res.status(200).json({ message: "Product count in stock updated", updatedProduct: product });
+    res.status(COMMON_SUCCESS_GET_CODE).json({ message: "Product count in stock updated", updatedProduct: product });
   } catch (error) {
     res.status(400).json({ message: "Failed to update product count in stock", error });
   }
