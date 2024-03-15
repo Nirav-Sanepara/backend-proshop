@@ -43,8 +43,6 @@ const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
   
   const userExists = await User.findOne({ email });
-
-
   if (userExists && userExists.isActive == true) {
     res.status(404).json({ message: "User already exists" });
     // throw new Error("User already exists");
@@ -80,8 +78,6 @@ const registerUser = asyncHandler(async (req, res) => {
 //@user Signup and his active status changed into true 
 //@signup first time based on condition
 //@access Public
-
-
 
 const registerUserActive = asyncHandler(async (req, res) => {
   const isValidate = yup.object({
@@ -147,35 +143,6 @@ const registerUserActive = asyncHandler(async (req, res) => {
   }
 
 });
-
-const registerWithGoogle = asyncHandler(async (req, res) => {
-  passport.use(new GoogleStrategy({
-    clientID: '383198814159-i6becmdphkpnq2b2kj94k6g6vqpu7avk.apps.googleusercontent.com',
-    clientSecret: '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',
-    callbackURL: 'http://localhost:3000/auth/google/callback',
-  },
-    async (accessToken, refreshToken, profile, done) => {
-      // Check if the user already exists in the database
-      const userExists = await User.findOne({ email: profile.emails[0].value });
-
-      if (userExists) {
-        // If the user exists, generate a token and send a response
-        return done(null, userExists);
-      } else {
-        // If the user doesn't exist, create a new user and save it to the database
-        const newUser = new User({
-          name: profile.displayName,
-          email: profile.emails[0].value,
-          password,
-          isActive: true, // You can set the default value as needed
-        });
-
-        await newUser.save();
-       res.json({message:"Signup successfully", newUser})
-      }
-    }
-  ));
-})
 
 // // @@ Soft delete user with isActive info
 
@@ -294,7 +261,9 @@ const addToCart = asyncHandler(async (req, res) => {
     if (!product) {
       return res.status(404).json({ error: "Product not found" });
     }
+
     const existingCartItem = await User.findOne({
+
       _id: userId,
       "cartItems.product": productId,
     });
