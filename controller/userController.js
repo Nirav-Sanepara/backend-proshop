@@ -30,7 +30,7 @@ const authUser = asyncHandler(async (req, res) => {
       token: generateToken(user._id),
     });
   } else {
-    res.status(401).send({ message: "Invalid Email or Password" });
+    res.status(COMMON_UPDATE_FAIL).send({ message: "Invalid Email or Password" });
     // throw new Error("Invalid Email or Password");
   }
 });
@@ -45,7 +45,7 @@ const registerUser = asyncHandler(async (req, res) => {
   const userExists = await User.findOne({ email });
 
   if (userExists && userExists.isActive == true) {
-    res.status(404).json({ message: "User already exists" });
+    res.status(COMMON_NOT_FOUND_CODE).json({ message: "User already exists" });
     // throw new Error("User already exists");
   }
 
@@ -61,7 +61,7 @@ const registerUser = asyncHandler(async (req, res) => {
     if (user) {
       const token = generateToken(user._id);
 
-      res.status(201).json({
+      res.status(COMMON_SUCCESS_GET_CODE).json({
         _id: user._id,
         name: user.name,
         email: user.email,
@@ -69,7 +69,7 @@ const registerUser = asyncHandler(async (req, res) => {
         token: generateToken(user._id),
       });
     } else {
-      res.status(400);
+      res.status(COMMON_UPDATE_FAIL);
       throw new Error("Invalid user data");
     }
   }
@@ -93,7 +93,7 @@ const registerUserActive = asyncHandler(async (req, res) => {
     // You can access the user information from req.user
     // Generate a token and send the response
     res
-      .status(200)
+      .status(COMMON_SUCCESS_GET_CODE)
       .json({
         message: "Google signup successfull",
         user: req.user,
@@ -103,7 +103,7 @@ const registerUserActive = asyncHandler(async (req, res) => {
   const userExists = await User.findOne({ email: x.email });
 
   if (userExists && userExists.isActive == true) {
-    res.status(404);
+    res.status(COMMON_NOT_FOUND_CODE);
     throw new Error("User already exists");
   } else if (userExists && userExists.isActive == false) {
     const StatusChange = await User.findOneAndUpdate(
@@ -113,7 +113,7 @@ const registerUserActive = asyncHandler(async (req, res) => {
     try {
       if (StatusChange) {
         res
-          .status(200)
+          .status(COMMON_SUCCESS_GET_CODE)
           .json({
             message: "Signup successfull",
             StatusChange,
@@ -128,7 +128,7 @@ const registerUserActive = asyncHandler(async (req, res) => {
     newUser.isActive = true;
     await newUser.save();
     if (newUser) {
-      res.status(201).json({
+      res.status(COMMON_SUCCESS_GET_CODE).json({
         _id: newUser._id,
         name: newUser.name,
         email: newUser.email,
@@ -137,7 +137,7 @@ const registerUserActive = asyncHandler(async (req, res) => {
         token: generateToken(newUser._id),
       });
     } else {
-      res.status(400).send({ message: "Invalid user data" });
+      res.status(COMMON_UPDATE_FAIL).send({ message: "Invalid user data" });
     }
   } else {
     res.json({ message: "Something went wrong please try again later" });
@@ -154,10 +154,10 @@ const userProfileSoftDelete = asyncHandler(async (req, res) => {
   );
   try {
     if (user) {
-      res.status(200).json({ message: "Account deleted Successfully", user });
+      res.status(COMMON_SUCCESS_GET_CODE).json({ message: "Account deleted Successfully", user });
     }
   } catch (err) {
-    res.status(404).json({ message: "user data not found", err });
+    res.status(COMMON_NOT_FOUND_CODE).json({ message: "user data not found", err });
   }
 });
 
@@ -176,7 +176,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
       role: user.role,
     });
   } else {
-    res.status(404);
+    res.status(COMMON_NOT_FOUND_CODE);
     throw new Error("User not found");
   }
 });
@@ -192,7 +192,7 @@ const getUserProfileByid = asyncHandler(async (req, res) => {
       role: user.role,
     });
   } else {
-    res.status(404);
+    res.status(COMMON_NOT_FOUND_CODE);
     throw new Error("User not found");
   }
 });
@@ -219,10 +219,10 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       role: user.role,
     });
   } else {
-    res.status(404).json({ message: "User not found" });
+    res.status(COMMON_NOT_FOUND_CODE).json({ message: "User not found" });
 
     // {
-    //   status: 200,
+    //   status: COMMON_SUCCESS_GET_CODE,
     //   message:"",
     //   data:
     // }
@@ -252,16 +252,16 @@ const addToCart = asyncHandler(async (req, res) => {
   const { userId, productId, quantity } = req.body;
   if (!userId || !productId || !quantity) {
     return res
-      .status(400)
+      .status(COMMON_UPDATE_FAIL)
       .json({ error: "UserId, productId, and quantity are required" });
   }
   if (quantity < 1) {
-    return res.status(400).json({ error: "Quantity must be at least 1" });
+    return res.status(COMMON_UPDATE_FAIL).json({ error: "Quantity must be at least 1" });
   }
   try {
     const product = await Product.findById(productId);
     if (!product) {
-      return res.status(404).json({ error: "Product not found" });
+      return res.status(COMMON_NOT_FOUND_CODE).json({ error: "Product not found" });
     }
     const existingCartItem = await User.findOne({
       _id: userId,
@@ -280,7 +280,7 @@ const addToCart = asyncHandler(async (req, res) => {
                   $inc: { "cartItems.$.quantity": quantity },
                 }
               );
-              res.status(200).json({
+              res.status(COMMON_SUCCESS_GET_CODE).json({
                 message: "Product quantity increase successfully",
                 product,
               });
@@ -299,7 +299,7 @@ const addToCart = asyncHandler(async (req, res) => {
       await User.findByIdAndUpdate(userId, {
         $addToSet: { cartItems: cartItem },
       });
-      res.status(200).json({
+      res.status(COMMON_SUCCESS_GET_CODE).json({
         message: "Product added to cart successfully",
         product: cartItem,
       });
@@ -309,7 +309,7 @@ const addToCart = asyncHandler(async (req, res) => {
     }
   } catch (error) {
     console.error(error);
-    res.status(400).json({ error: "Something went wrong" });
+    res.status(COMMON_UPDATE_FAIL).json({ error: "Something went wrong" });
   }
 });
 
@@ -324,10 +324,10 @@ const removeFromCart = asyncHandler(async (req, res) => {
     };
 
     await User.findByIdAndUpdate(userId, { $pull: { cartItems: cartItem } });
-    res.status(200).json("Product removed from cart successfully");
+    res.status(COMMON_SUCCESS_GET_CODE).json("Product removed from cart successfully");
   } catch (error) {
     console.error(error);
-    res.status(500).json("Internal server error");
+    res.status(COMMON_INT_SERVER_CODE).json("Internal server error");
   }
 });
 
@@ -357,12 +357,12 @@ const displayCartItems = asyncHandler(async (req, res) => {
         await user.save();
       }
 
-      res.status(200).json(cartItems);
+      res.status(COMMON_SUCCESS_GET_CODE).json(cartItems);
     } else {
       res.send("User not found");
     }
   } catch (error) {
-    res.status(400).json({ message: "something went wwrong", error });
+    res.status(COMMON_UPDATE_FAIL).json({ message: "something went wwrong", error });
     console.error(error);
   }
 });
@@ -374,28 +374,28 @@ const displayCartItems = asyncHandler(async (req, res) => {
 
 //   try {
 //     if (!userId || !productId || !newQuantity) {
-//       return res.status(400).json({ error: "UserId, productId, and newQuantity are required" });
+//       return res.status(COMMON_UPDATE_FAIL).json({ error: "UserId, productId, and newQuantity are required" });
 //     }
 //     if (newQuantity < 1) {
-//       return res.status(400).json({ error: "New quantity must be at least 1" });
+//       return res.status(COMMON_UPDATE_FAIL).json({ error: "New quantity must be at least 1" });
 //     }
 //     const user = await User.findById(userId);
 //     if (!user) {
-//       return res.status(404).json({ error: "User not found" });
+//       return res.status(COMMON_NOT_FOUND_CODE).json({ error: "User not found" });
 //     }
 //     const cartItemIndex = user.cartItems.findIndex(item => item.product.toString() === productId);
 //     console.log(cartItemIndex, 'cartindex');
 //     if (cartItemIndex === -1) {
-//       return res.status(404).json({ error: "Product not found in the cart" });
+//       return res.status(COMMON_NOT_FOUND_CODE).json({ error: "Product not found in the cart" });
 //     }
 //     const updatedCartItems = [...user.cartItems];
 //     updatedCartItems[cartItemIndex].quantity = newQuantity;
 //     const changedItems=updatedCartItems[cartItemIndex]
 //     await User.findByIdAndUpdate(userId, { cartItems: updatedCartItems });
-//     res.status(200).json({ message: "Quantity updated successfully", changedItems});
+//     res.status(COMMON_SUCCESS_GET_CODE).json({ message: "Quantity updated successfully", changedItems});
 //   } catch (error) {
 //     console.error(error);
-//     res.status(500).json({ error: "Internal the  server error" });
+//     res.status(COMMON_INT_SERVER_CODE).json({ error: "Internal the  server error" });
 //   }
 // });
 const updateCartItemQuantity = asyncHandler(async (req, res) => {
@@ -404,24 +404,24 @@ const updateCartItemQuantity = asyncHandler(async (req, res) => {
   try {
     if (!userId || !productId || !newQuantity) {
       return res
-        .status(400)
+        .status(COMMON_UPDATE_FAIL)
         .json({ error: "UserId, productId, and newQuantity are required" });
     }
 
     if (newQuantity < 1) {
-      return res.status(400).json({ error: "New quantity must be at least 1" });
+      return res.status(COMMON_UPDATE_FAIL).json({ error: "New quantity must be at least 1" });
     }
 
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(COMMON_NOT_FOUND_CODE).json({ error: "User not found" });
     }
 
     const cartItemIndex = user.cartItems.findIndex(
       (item) => item.product.toString() === productId
     );
     if (cartItemIndex === -1) {
-      return res.status(404).json({ error: "Product not found in the cart" });
+      return res.status(COMMON_NOT_FOUND_CODE).json({ error: "Product not found in the cart" });
     }
 
     const updatedCartItems = [...user.cartItems];
@@ -444,14 +444,14 @@ const updateCartItemQuantity = asyncHandler(async (req, res) => {
     await user.save();
 
     res
-      .status(200)
+      .status(COMMON_SUCCESS_GET_CODE)
       .json({
         message: "Quantity updated successfully",
         changedItems: originalCartItem,
       });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(COMMON_INT_SERVER_CODE).json({ error: "Internal server error" });
   }
 });
 
@@ -465,14 +465,14 @@ const favouriteItemAdd = asyncHandler(async (req, res) => {
 
   if (!userId || !productId) {
     return res
-      .status(400)
+      .status(COMMON_UPDATE_FAIL)
       .json({ error: "UserId, productId, and quantity are required" });
   }
 
   try {
     const product = await Product.findById(productId);
     if (!product) {
-      return res.status(404).json({ error: "Product not found" });
+      return res.status(COMMON_NOT_FOUND_CODE).json({ error: "Product not found" });
     }
 
     const existingCartItem = await User.findOne({
@@ -490,14 +490,14 @@ const favouriteItemAdd = asyncHandler(async (req, res) => {
     });
 
     res
-      .status(200)
+      .status(COMMON_SUCCESS_GET_CODE)
       .json({
         message: "Product added to favourite list successfully",
         favourite,
       });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(COMMON_INT_SERVER_CODE).json({ error: "Internal server error" });
   }
 });
 
@@ -510,10 +510,10 @@ const favouriteItemRemove = asyncHandler(async (req, res) => {
     await User.findByIdAndUpdate(userId, {
       $pull: { favoriteProducts: { product: productId } },
     });
-    res.status(200).json("Product removed from cart successfully");
+    res.status(COMMON_SUCCESS_GET_CODE).json("Product removed from cart successfully");
   } catch (error) {
     console.error(error);
-    res.status(500).json("Internal server error");
+    res.status(COMMON_INT_SERVER_CODE).json("Internal server error");
   }
 });
 
@@ -528,12 +528,12 @@ const displayFavouriteItems = asyncHandler(async (req, res) => {
     if (user) {
       const cartItems = user.favoriteProducts;
 
-      res.status(200).json(cartItems);
+      res.status(COMMON_SUCCESS_GET_CODE).json(cartItems);
     } else {
       res.send("User not found");
     }
   } catch (error) {
-    res.status(500).json("Internal server error");
+    res.status(COMMON_INT_SERVER_CODE).json("Internal server error");
     console.error(error);
   }
 });

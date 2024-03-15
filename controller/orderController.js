@@ -22,9 +22,9 @@ const addOrderItems = asyncHandler(async (req, res) => {
   
   const productData = await Product.findById(cartItems._id)
 
-  console.log(cartItems ," dsifjdkfjsdfldsgjdflgjdflgndfknsxfnsofjfosfjmndkvs ", productData, "  adhiudhid sadh dhsak dhsakd hsak ")
+  
   if (cartItems && cartItems.length === 0) {
-    res.status(400);
+    res.status(COMMON_NOT_FOUND_CODE);
     throw new Error("No order items");
   } else if(userExists.isActive==true ) {
    
@@ -41,7 +41,7 @@ const addOrderItems = asyncHandler(async (req, res) => {
     });
     const orderCreated = await order.save();
    
-    res.status(201).json(orderCreated);
+    res.status(COMMON_SUCCESS_GET_CODE).json(orderCreated);
   }
   else{
     res.json({message:"Something went wrong please try again later"});
@@ -64,7 +64,7 @@ const getOrderByUserId = asyncHandler(async (req, res) => {
     res.json(order);
   } else {
     console.log("errrrrr");
-    res.status(404);
+    res.status(COMMON_NOT_FOUND_CODE);
     throw new Error("Order not found");
   }
 });
@@ -75,7 +75,7 @@ const getOrderById = asyncHandler( async (req, res) => {
   if (order) {
     res.json(order);
   } else {
-    res.status(404).json({ message: "Product not found" });
+    res.status(COMMON_NOT_FOUND_CODE).json({ message: "Product not found" });
   }
 
 })

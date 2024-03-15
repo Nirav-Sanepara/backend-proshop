@@ -82,7 +82,7 @@ const deleteProductById = asyncHandler(async (req, res) => {
         product: deleteProduct,
       });
     } else {
-      res.status(500).json("couldn't delete product");
+      res.status(COMMON_INT_SERVER_CODE).json("couldn't delete product");
     }
   } else {
     res.status(COMMON_NOT_FOUND_CODE).json({ message: COM_NOT_FOUND_MESSAGE("Product") });
@@ -111,7 +111,7 @@ const addProduct = asyncHandler(async (req, res) => {
 
   
   const createdProduct = await products.save();
-  res.status(201).json({ message: "Product added successfully", createdProduct });
+  res.status(COMMON_SUCCESS_GET_CODE).json({ message: "Product added successfully", createdProduct });
  
 
 });
@@ -148,7 +148,7 @@ const putUpdateProduct = asyncHandler(async (req, res) => {
       if (!isValidOperation) {
         
         return res
-          .status(400)
+          .status(COMMON_UPDATE_FAIL)
           .json({ status: "fail", message: "Invalid updates" });
       }
       updates.forEach((update) => (product[update] = req.body[update]));
@@ -163,7 +163,7 @@ const putUpdateProduct = asyncHandler(async (req, res) => {
     }
   } catch (error) {
     console.log(error , 'update product error')
-    res.status(400).json({ message: "Product update failed", error });
+    res.status(COMMON_UPDATE_FAIL).json({ message: "Product update failed", error });
   }
 });
 
@@ -172,7 +172,7 @@ const updateProductCountInStock = asyncHandler(async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
     if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+      return res.status(COMMON_NOT_FOUND_CODE).json({ message: "Product not found" });
     }
 
       product.countInStock -= quantity;
@@ -181,7 +181,7 @@ const updateProductCountInStock = asyncHandler(async (req, res) => {
 
     res.status(COMMON_SUCCESS_GET_CODE).json({ message: "Product count in stock updated", updatedProduct: product });
   } catch (error) {
-    res.status(400).json({ message: "Failed to update product count in stock", error });
+    res.status(COMMON_UPDATE_FAIL).json({ message: "Failed to update product count in stock", error });
   }
 });
 
@@ -195,7 +195,7 @@ const getProductByUserId = asyncHandler(async (req, res) => {
   try {
     const results = await Product.find({ user: req.user._id })
     if (results) {
-      res.status(200).json(results)
+      res.status(COMMON_SUCCESS_GET_CODE).json(results)
     }
     else {
       res.json("Results not found")
@@ -212,7 +212,7 @@ const getProductByParamsUserId = asyncHandler(async (req, res) => {
   try {
     const results = await Product.find({ user: req.params.id })
     if (results) {
-      res.status(200).json(results)
+      res.status(COMMON_SUCCESS_GET_CODE).json(results)
     }
     else {
       res.json("Results not found")
@@ -230,10 +230,10 @@ const updateStatusOfProductActive = asyncHandler(async (req, res) => {
   if (isExists) {
     isExists.isActive = !isExists.isActive
     isExists.save()
-    res.status(200).json({ message: "Product status changed successfully", isExists })
+    res.status(COMMON_SUCCESS_GET_CODE).json({ message: "Product status changed successfully", isExists })
   }
   else {
-    res.status(404).json({ message: "Product not found" })
+    res.status(COMMON_NOT_FOUND_CODE).json({ message: "Product not found" })
   }
 })
 
