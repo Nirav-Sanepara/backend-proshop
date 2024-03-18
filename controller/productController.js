@@ -258,30 +258,43 @@ const updateNumOfReviews = asyncHandler(async (req, res) => {
    }
 })
 
-const addReviews = asyncHandler(async(req,res)=>{
-  const product = await Product.findById(req.params.id)
- 
-    const {name, comment} = req.body;
-    const review = {
-      name , comment
-    }
-   try{
-    if(product){
-    
-      product.reviews.push(review)
+const addReviews = asyncHandler(async (req, res) => {
+  const product = await Product.findById(req.params.id);
 
-      await product.save()
-       res.json({message:"Rating Updated Successfully", product})
-    }
-    else{
-      res.json({message: 'Product not found'})
-    }
-   }
-   catch(err){
-    res.json({error:err})
-   }
-})
+  const { name, comment, rating } = req.body;
+  const review = {
+    name,
+    comment,
+    rating,
+  };
 
+  console.log(req.body , " ppppppppppppppppppppppp  ")
+
+  try {
+    if (product) {
+      const existingReviewIndex = product.reviews.findIndex(
+        (rev) => rev.name === name
+      );
+
+      if (existingReviewIndex !== -1) {
+        product.numReviews += rating - product.reviews[existingReviewIndex].rating;
+        product.reviews[existingReviewIndex] = review;
+      } else {
+
+        product.numReviews += rating;
+        product.reviews.push(review);
+      }
+
+      product.rating = Math.floor(product.numReviews / product.reviews.length);
+      await product.save();
+      res.json({ message: "Rating Updated Successfully", product });
+    } else {
+      res.json({ message: "Product not found" });
+    }
+  } catch (err) {
+    res.json({ error: err });
+  }
+});
 
 export {
   getProducts,

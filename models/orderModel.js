@@ -37,7 +37,7 @@ const orderSchema = new Schema(
       update_time: { type: String },
       email_address: { type: String },
     },
-    texPrice: {
+    taxPrice: {
       type: Number,
       required: true,
       default: 0,
@@ -67,6 +67,36 @@ const orderSchema = new Schema(
     },
     isDeliveredAt: {
       type: Date,
+    },
+
+    return_details: {
+      user_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: false,
+        ref: "User",
+      },
+      product_id: [
+       {
+        poduct: {
+          type: mongoose.Schema.Types.ObjectId,
+          required: false,
+          ref: "Product",
+        },
+        quantity:{
+          type : Number,
+          required : false
+        }
+       }
+      ],
+      
+      return_status: {
+        type: String,
+        enum: ["pending", "success"],
+        default: "pending",
+      },
+      reason: { type: String, required: false },
+      return_date: { type: Date, require: false }
+     
     },
   },
   {

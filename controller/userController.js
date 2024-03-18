@@ -526,8 +526,25 @@ const displayFavouriteItems = asyncHandler(async (req, res) => {
       "favoriteProducts.product"
     );
     if (user) {
-      const cartItems = user.favoriteProducts;
+      var cartItems = user.favoriteProducts;
+      //var cartItems = user.cartItems;
+   var product = await Product.find()
+      cartItems = cartItems.filter((cartItem) => {
+        if (cartItem.product == null) {
+        } else {
+          return product.some((product) =>
+            product._id.equals(cartItem.product._id)
+          );
+        }
+      });
 
+      // Update user's cartItems if any products were removed
+      if (cartItems.length !== user.favoriteProducts.length) {
+        user.favoriteProducts = cartItems;
+        await user.save();
+      }
+
+      res.status(200).json(cartItems);
       res.status(200).json(cartItems);
     } else {
       res.send("User not found");
