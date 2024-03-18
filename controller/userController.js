@@ -6,6 +6,15 @@ import yup, { string } from "yup";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 
+import {
+  COMMON_NOT_FOUND_CODE,
+    COMMON_SUCCESS_GET_CODE,
+    COM_NOT_FOUND_MESSAGE,
+    COMMON_INT_SERVER_CODE,
+    COMMON_UPDATE_FAIL,
+    COM_SUCCESS_POST_MESSAGE,
+} from '../statusCodeResponse/index.js'
+
 // @desc Auth user and get token
 //@route POST /api/users/login
 //@access Public
@@ -157,7 +166,7 @@ const userProfileSoftDelete = asyncHandler(async (req, res) => {
       res.status(COMMON_SUCCESS_GET_CODE).json({ message: "Account deleted Successfully", user });
     }
   } catch (err) {
-    res.status(COMMON_NOT_FOUND_CODE).json({ message: "user data not found", err });
+    res.status(COMMON_NOT_FOUND_CODE).json({ message: COM_NOT_FOUND_MESSAGE("user"), err });
   }
 });
 
@@ -177,7 +186,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
     });
   } else {
     res.status(COMMON_NOT_FOUND_CODE);
-    throw new Error("User not found");
+    throw new Error(COM_NOT_FOUND_MESSAGE("user"));
   }
 });
 
@@ -193,7 +202,7 @@ const getUserProfileByid = asyncHandler(async (req, res) => {
     });
   } else {
     res.status(COMMON_NOT_FOUND_CODE);
-    throw new Error("User not found");
+    throw new Error(COM_NOT_FOUND_MESSAGE("user"));
   }
 });
 // @desc UPDATE user profile
@@ -210,6 +219,8 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       user.password = req.body.password;
     }
 
+    
+
     const updateUser = await user.save();
 
     res.json({
@@ -219,7 +230,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       role: user.role,
     });
   } else {
-    res.status(COMMON_NOT_FOUND_CODE).json({ message: "User not found" });
+    res.status(COMMON_NOT_FOUND_CODE).json({ message: COM_NOT_FOUND_MESSAGE("user") });
 
     // {
     //   status: COMMON_SUCCESS_GET_CODE,
@@ -261,7 +272,7 @@ const addToCart = asyncHandler(async (req, res) => {
   try {
     const product = await Product.findById(productId);
     if (!product) {
-      return res.status(COMMON_NOT_FOUND_CODE).json({ error: "Product not found" });
+      return res.status(COMMON_NOT_FOUND_CODE).json({ error: COM_NOT_FOUND_MESSAGE("product") });
     }
     const existingCartItem = await User.findOne({
       _id: userId,
@@ -300,7 +311,7 @@ const addToCart = asyncHandler(async (req, res) => {
         $addToSet: { cartItems: cartItem },
       });
       res.status(COMMON_SUCCESS_GET_CODE).json({
-        message: "Product added to cart successfully",
+        message: COM_SUCCESS_POST_MESSAGE("product"),
         product: cartItem,
       });
     } 
@@ -359,7 +370,7 @@ const displayCartItems = asyncHandler(async (req, res) => {
 
       res.status(COMMON_SUCCESS_GET_CODE).json(cartItems);
     } else {
-      res.send("User not found");
+      res.send(COM_NOT_FOUND_MESSAGE("user"));
     }
   } catch (error) {
     res.status(COMMON_UPDATE_FAIL).json({ message: "something went wwrong", error });
@@ -414,14 +425,14 @@ const updateCartItemQuantity = asyncHandler(async (req, res) => {
 
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(COMMON_NOT_FOUND_CODE).json({ error: "User not found" });
+      return res.status(COMMON_NOT_FOUND_CODE).json({ error:COM_NOT_FOUND_MESSAGE("user") });
     }
 
     const cartItemIndex = user.cartItems.findIndex(
       (item) => item.product.toString() === productId
     );
     if (cartItemIndex === -1) {
-      return res.status(COMMON_NOT_FOUND_CODE).json({ error: "Product not found in the cart" });
+      return res.status(COMMON_NOT_FOUND_CODE).json({ error:COM_NOT_FOUND_MESSAGE("product") });
     }
 
     const updatedCartItems = [...user.cartItems];
@@ -472,7 +483,7 @@ const favouriteItemAdd = asyncHandler(async (req, res) => {
   try {
     const product = await Product.findById(productId);
     if (!product) {
-      return res.status(COMMON_NOT_FOUND_CODE).json({ error: "Product not found" });
+      return res.status(COMMON_NOT_FOUND_CODE).json({ error: COM_NOT_FOUND_MESSAGE("product") });
     }
 
     const existingCartItem = await User.findOne({
@@ -492,7 +503,7 @@ const favouriteItemAdd = asyncHandler(async (req, res) => {
     res
       .status(COMMON_SUCCESS_GET_CODE)
       .json({
-        message: "Product added to favourite list successfully",
+        message: COM_SUCCESS_POST_MESSAGE("product"),
         favourite,
       });
   } catch (error) {
@@ -530,7 +541,7 @@ const displayFavouriteItems = asyncHandler(async (req, res) => {
 
       res.status(COMMON_SUCCESS_GET_CODE).json(cartItems);
     } else {
-      res.send("User not found");
+      res.send(COM_NOT_FOUND_MESSAGE("user"));
     }
   } catch (error) {
     res.status(COMMON_INT_SERVER_CODE).json("Internal server error");

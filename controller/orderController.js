@@ -3,6 +3,15 @@ import Order from "../models/orderModel.js";
 import User from "../models/userModel.js";
 import Product from "../models/productModel.js";
 
+import {
+  COMMON_NOT_FOUND_CODE,
+    COMMON_SUCCESS_GET_CODE,
+    COM_NOT_FOUND_MESSAGE,
+    COMMON_INT_SERVER_CODE,
+    COMMON_UPDATE_FAIL,
+    COM_SUCCESS_POST_MESSAGE,
+} from '../statusCodeResponse/index.js'
+
 // @desc Create new order
 //@route POST /api/orders
 //@access Private
@@ -65,7 +74,7 @@ const getOrderByUserId = asyncHandler(async (req, res) => {
   } else {
     console.log("errrrrr");
     res.status(COMMON_NOT_FOUND_CODE);
-    throw new Error("Order not found");
+    throw new Error(COM_NOT_FOUND_MESSAGE("orders"));
   }
 });
 
@@ -75,7 +84,7 @@ const getOrderById = asyncHandler( async (req, res) => {
   if (order) {
     res.json(order);
   } else {
-    res.status(COMMON_NOT_FOUND_CODE).json({ message: "Product not found" });
+    res.status(COMMON_NOT_FOUND_CODE).json({ message: COM_NOT_FOUND_MESSAGE("products") });
   }
 
 })
