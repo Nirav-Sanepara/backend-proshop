@@ -257,36 +257,30 @@ const updateNumOfReviews = asyncHandler(async (req, res) => {
 
 const addReviews = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id);
-
   const { name, comment, rating } = req.body;
   const review = {
     name,
     comment,
     rating,
   };
-
   console.log(req.body , " ppppppppppppppppppppppp  ")
-
   try {
     if (product) {
       const existingReviewIndex = product.reviews.findIndex(
         (rev) => rev.name === name
       );
-
       if (existingReviewIndex !== -1) {
         product.numReviews += rating - product.reviews[existingReviewIndex].rating;
         product.reviews[existingReviewIndex] = review;
       } else {
-
         product.numReviews += rating;
         product.reviews.push(review);
       }
-
-      await product.save()
-       res.json({message:COM_SUCCESS_POST_MESSAGE("product"), product})
-    }
-    else{
-      res.json({message: COM_NOT_FOUND_MESSAGE("product")})
+      product.rating = Math.floor(product.numReviews / product.reviews.length);
+      await product.save();
+      res.json({ message: "Rating Updated Successfully", product });
+    } else {
+      res.json({ message: "Product not found" });
     }
   } catch (err) {
     res.json({ error: err });
