@@ -3,13 +3,22 @@ import Product from "../models/productModel.js";
 import jwt from "jsonwebtoken";
 import User from "../models/userModel.js";
 import createSocketServer from "../utils/socket.js";
-const { io, server } = createSocketServer();
+
+import {
+  COMMON_NOT_FOUND_CODE,
+    COMMON_SUCCESS_GET_CODE,
+    COM_NOT_FOUND_MESSAGE,
+    COMMON_INT_SERVER_CODE,
+    COMMON_UPDATE_FAIL,
+    COM_SUCCESS_POST_MESSAGE,
+} from '../statusCodeResponse/index.js'
+
+
+const {io, server}=createSocketServer()
+
 const getProducts = asyncHandler(async (req, res) => {
   //const products = await Product.find({});
-  const activeUserIds = (await User.find({ isActive: true })).map(
-    (user) => user._id
-  );
-
+  const activeUserIds = (await User.find({ isActive: true })).map(user => user._id);
   var products = await Product.find({
     isActive: true,
     user: { $in: activeUserIds },
@@ -36,24 +45,26 @@ const getProducts = asyncHandler(async (req, res) => {
       };
     });
 
-    res.json(products);
-  } else {
+    res.status(COMMON_SUCCESS_GET_CODE).json(products)
+  }
+  else {
     products = products.map((prd) => ({
       ...prd.toObject(),
       isFavorite: false,
     }));
 
-    res.status(200).json(products);
+
+    res.status(COMMON_SUCCESS_GET_CODE).json(products);
   }
 });
 
 const getProductById = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id);
-  console.log(product, "products");
+
   if (product) {
     res.json(product);
   } else {
-    res.status(404).json({ message: "Product not found" });
+    res.status(COMMON_NOT_FOUND_CODE).json({ message: COM_NOT_FOUND_MESSAGE("Product") });
   }
 });
 
@@ -65,15 +76,15 @@ const deleteProductById = asyncHandler(async (req, res) => {
       _id: req.params.id,
     });
     if (deleteProduct) {
-      res.status(200).json({
+      res.status(COMMON_SUCCESS_GET_CODE).json({
         message: "Product deleted successfully",
         product: deleteProduct,
       });
     } else {
-      res.status(500).json("couldn't delete product");
+      res.status(COMMON_INT_SERVER_CODE).json("couldn't delete product");
     }
   } else {
-    res.status(404).json({ message: "Product not found" });
+    res.status(COMMON_NOT_FOUND_CODE).json({ message: COM_NOT_FOUND_MESSAGE("Product") });
   }
 });
 
@@ -107,9 +118,9 @@ const addProduct = asyncHandler(async (req, res) => {
   });
 
   const createdProduct = await products.save();
-  res
-    .status(201)
-    .json({ message: "Product added successfully", createdProduct });
+  res.status(COMMON_SUCCESS_GET_CODE).json({ message: COM_SUCCESS_POST_MESSAGE("product"), createdProduct });
+ 
+
 });
 
 // @desc update product
@@ -142,7 +153,7 @@ const putUpdateProduct = asyncHandler(async (req, res) => {
 
       if (!isValidOperation) {
         return res
-          .status(400)
+          .status(COMMON_UPDATE_FAIL)
           .json({ status: "fail", message: "Invalid updates" });
       }
       updates.forEach((update) => (product[update] = req.body[update]));
@@ -150,13 +161,14 @@ const putUpdateProduct = asyncHandler(async (req, res) => {
 
       io.emit("productUpdated", product);
 
-      res.status(200).json({ message: "Product update successfully", product });
+
+      res.status(COMMON_SUCCESS_GET_CODE).json({ message: COM_SUCCESS_POST_MESSAGE("product"), product });
     } else {
-      res.status(404).json({ message: "Product not found" });
+      res.status(COMMON_NOT_FOUND_CODE).json({ message: COM_NOT_FOUND_MESSAGE("Product")});
     }
   } catch (error) {
-    console.log(error, "update product error");
-    res.status(400).json({ message: "Product update failed", error });
+    console.log(error , 'update product error')
+    res.status(COMMON_UPDATE_FAIL).json({ message: "Product update failed", error });
   }
 });
 
@@ -165,22 +177,16 @@ const updateProductCountInStock = asyncHandler(async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
     if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+      return res.status(COMMON_NOT_FOUND_CODE).json({ message: COM_NOT_FOUND_MESSAGE("product") });
     }
 
-    product.countInStock -= quantity;
-    await product.save();
+      product.countInStock -= quantity;
+      await product.save();
+    
 
-    res
-      .status(200)
-      .json({
-        message: "Product count in stock updated",
-        updatedProduct: product,
-      });
+    res.status(COMMON_SUCCESS_GET_CODE).json({ message: COM_SUCCESS_POST_MESSAGE("product"), updatedProduct: product });
   } catch (error) {
-    res
-      .status(400)
-      .json({ message: "Failed to update product count in stock", error });
+    res.status(COMMON_UPDATE_FAIL).json({ message: "Failed to update product count in stock", error });
   }
 });
 
@@ -192,9 +198,10 @@ const getProductByUserId = asyncHandler(async (req, res) => {
   try {
     const results = await Product.find({ user: req.user._id });
     if (results) {
-      res.status(200).json(results);
-    } else {
-      res.json("Results not found");
+      res.status(COMMON_SUCCESS_GET_CODE).json(results)
+    }
+    else {
+      res.json(COM_NOT_FOUND_MESSAGE("result"))
     }
   } catch (err) {
     res.json("something went wrong");
@@ -205,9 +212,10 @@ const getProductByParamsUserId = asyncHandler(async (req, res) => {
   try {
     const results = await Product.find({ user: req.params.id });
     if (results) {
-      res.status(200).json(results);
-    } else {
-      res.json("Results not found");
+      res.status(COMMON_SUCCESS_GET_CODE).json(results)
+    }
+    else {
+      res.json(COM_NOT_FOUND_MESSAGE("result"))
     }
   } catch (err) {
     res.json("something went wrong");
@@ -217,13 +225,12 @@ const getProductByParamsUserId = asyncHandler(async (req, res) => {
 const updateStatusOfProductActive = asyncHandler(async (req, res) => {
   const isExists = await Product.findById(req.params.id);
   if (isExists) {
-    isExists.isActive = !isExists.isActive;
-    isExists.save();
-    res
-      .status(200)
-      .json({ message: "Product status changed successfully", isExists });
-  } else {
-    res.status(404).json({ message: "Product not found" });
+    isExists.isActive = !isExists.isActive
+    isExists.save()
+    res.status(COMMON_SUCCESS_GET_CODE).json({ message: COM_SUCCESS_POST_MESSAGE("product"), isExists })
+  }
+  else {
+    res.status(COMMON_NOT_FOUND_CODE).json({ message: COM_NOT_FOUND_MESSAGE("product") })
   }
 });
 
@@ -240,7 +247,7 @@ const updateNumOfReviews = asyncHandler(async (req, res) => {
        res.json({message:"Rating Updated Successfully", product})
     }
     else{
-      res.json({message: 'Product not found'})
+      res.json({message: COM_NOT_FOUND_MESSAGE("product")})
     }
    }
    catch(err){
@@ -275,11 +282,11 @@ const addReviews = asyncHandler(async (req, res) => {
         product.reviews.push(review);
       }
 
-      product.rating = Math.floor(product.numReviews / product.reviews.length);
-      await product.save();
-      res.json({ message: "Rating Updated Successfully", product });
-    } else {
-      res.json({ message: "Product not found" });
+      await product.save()
+       res.json({message:COM_SUCCESS_POST_MESSAGE("product"), product})
+    }
+    else{
+      res.json({message: COM_NOT_FOUND_MESSAGE("product")})
     }
   } catch (err) {
     res.json({ error: err });
