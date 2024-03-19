@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
-
 const orderSchema = new Schema(
   {
     user: {
@@ -37,6 +36,7 @@ const orderSchema = new Schema(
       update_time: { type: String },
       email_address: { type: String },
     },
+    taxPrice: {
     taxPrice: {
       type: Number,
       required: true,
@@ -103,7 +103,5 @@ const orderSchema = new Schema(
     timestamps: true,
   }
 );
-
 const Order = mongoose.model("Order", orderSchema);
-
 export default Order;

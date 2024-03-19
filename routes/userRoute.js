@@ -15,6 +15,7 @@ import {
   favouriteItemRemove,
   updateCartItemQuantity,
   getUserProfileByid,
+  forgotPassword,
 
 } from "../controller/userController.js";
 
@@ -36,6 +37,8 @@ router.post('/removecart',protect,removeFromCart)
 router.post('/addTofavourite',protect,favouriteItemAdd)
 router.post('/removeFav',protect,favouriteItemRemove)
 router.post('/updateqty', updateCartItemQuantity)
+
+
 
 router.route("/").get(protect, allUserDataGetting)
 

@@ -8,12 +8,13 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 
 import {
   COMMON_NOT_FOUND_CODE,
-    COMMON_SUCCESS_GET_CODE,
-    COM_NOT_FOUND_MESSAGE,
-    COMMON_INT_SERVER_CODE,
-    COMMON_UPDATE_FAIL,
-    COM_SUCCESS_POST_MESSAGE,
-} from '../statusCodeResponse/index.js'
+  COMMON_SUCCESS_GET_CODE,
+  COM_NOT_FOUND_MESSAGE,
+  COMMON_INT_SERVER_CODE,
+  COMMON_UPDATE_FAIL,
+  COM_SUCCESS_POST_MESSAGE,
+} from "../statusCodeResponse/index.js";
+import bcrypt from "bcryptjs/dist/bcrypt.js";
 
 // @desc Auth user and get token
 //@route POST /api/users/login
@@ -39,7 +40,9 @@ const authUser = asyncHandler(async (req, res) => {
       token: generateToken(user._id),
     });
   } else {
-    res.status(COMMON_UPDATE_FAIL).send({ message: "Invalid Email or Password" });
+    res
+      .status(COMMON_UPDATE_FAIL)
+      .send({ message: "Invalid Email or Password" });
     // throw new Error("Invalid Email or Password");
   }
 });
@@ -101,13 +104,11 @@ const registerUserActive = asyncHandler(async (req, res) => {
     // Handle Google registration here
     // You can access the user information from req.user
     // Generate a token and send the response
-    res
-      .status(COMMON_SUCCESS_GET_CODE)
-      .json({
-        message: "Google signup successfull",
-        user: req.user,
-        token: generateToken(req.user._id),
-      });
+    res.status(COMMON_SUCCESS_GET_CODE).json({
+      message: "Google signup successfull",
+      user: req.user,
+      token: generateToken(req.user._id),
+    });
   }
   const userExists = await User.findOne({ email: x.email });
 
@@ -121,13 +122,11 @@ const registerUserActive = asyncHandler(async (req, res) => {
     );
     try {
       if (StatusChange) {
-        res
-          .status(COMMON_SUCCESS_GET_CODE)
-          .json({
-            message: "Signup successfull",
-            StatusChange,
-            token: generateToken(userExists._id),
-          });
+        res.status(COMMON_SUCCESS_GET_CODE).json({
+          message: "Signup successfull",
+          StatusChange,
+          token: generateToken(userExists._id),
+        });
       }
     } catch (err) {
       res.json({ message: "Something went wrong plase try again", err });
@@ -163,10 +162,14 @@ const userProfileSoftDelete = asyncHandler(async (req, res) => {
   );
   try {
     if (user) {
-      res.status(COMMON_SUCCESS_GET_CODE).json({ message: "Account deleted Successfully", user });
+      res
+        .status(COMMON_SUCCESS_GET_CODE)
+        .json({ message: "Account deleted Successfully", user });
     }
   } catch (err) {
-    res.status(COMMON_NOT_FOUND_CODE).json({ message: COM_NOT_FOUND_MESSAGE("user"), err });
+    res
+      .status(COMMON_NOT_FOUND_CODE)
+      .json({ message: COM_NOT_FOUND_MESSAGE("user"), err });
   }
 });
 
@@ -212,14 +215,21 @@ const getUserProfileByid = asyncHandler(async (req, res) => {
 const updateUserProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
 
-  if (user) {
-    user.name = req.body.name || user.name;
-    user.email = req.body.email || user.email;
-    if (req.body.password) {
-      user.password = req.body.password;
-    }
+  const isValidate = yup.object({
+    name: yup.string().min(1).required(),
+    email: yup.string().email().required(),
+    password: yup.string().required(),
+   
+  });
 
-    
+  const yupUser = await isValidate.validate(req.body);
+
+  if (user) {
+    user.name = yupUser.name || user.name;
+    user.email = yupUser.email || user.email;
+    if (yupUser.password) {
+      user.password = yupUser.password;
+    }
 
     const updateUser = await user.save();
 
@@ -230,7 +240,9 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       role: user.role,
     });
   } else {
-    res.status(COMMON_NOT_FOUND_CODE).json({ message: COM_NOT_FOUND_MESSAGE("user") });
+    res
+      .status(COMMON_NOT_FOUND_CODE)
+      .json({ message: COM_NOT_FOUND_MESSAGE("user") });
 
     // {
     //   status: COMMON_SUCCESS_GET_CODE,
@@ -240,6 +252,101 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 
     // return common(CON.NOT_FOUND,CON.NOT_FOUND_MSG('User'), null)
     // return common(CON.SUCCESS,CON.SUCCESS_MSG('User'), data)
+  }
+});
+
+const forgotPassword = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id);
+
+  try {
+    if (!user) {
+      return res
+        .status(COMMON_NOT_FOUND_CODE)
+        .json({ message: COM_NOT_FOUND_MESSAGE("user") });
+    }
+
+    const token = generateToken(user._id);
+    const link = "http://localhost:3000/resetPassword/${user._id}/${token}";
+
+    var transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "istra0802@gmail.com",
+        pass: "ishasojitra2002",
+      },
+    });
+
+    var mailOptions = {
+      from: "istra0802@gmail.com",
+      to: "istra0802@gmail.com",
+      subject: "Password Reset",
+      text: link,
+    };
+
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log("Email sent: " + info.response);
+      }
+    });
+
+    console.log(link, " link ===========================================");
+  } catch (error) {}
+});
+
+const resetPassword = asyncHandler(async (req, res) => {
+  const { id, token } = req.params;
+  console.log(req.params);
+
+  const user = await User.findById({ _id: id });
+
+  if (!user) {
+    return res
+      .status(COMMON_NOT_FOUND_CODE)
+      .json({ message: COM_NOT_FOUND_MESSAGE("user") });
+  }
+
+  try {
+    const verify = jwt.verify(token);
+    res.render("index", { email: verify.email });
+    res.send("Verified");
+  } catch (error) {
+    res.send("Not Verified");
+  }
+});
+
+const updatePassword = asyncHandler(async (req, res) => {
+  const { id, token } = req.params;
+  const { password } = req.body;
+  console.log(req.params);
+
+  const user = await User.findById({ _id: id });
+
+  if (!user) {
+    return res
+      .status(COMMON_NOT_FOUND_CODE)
+      .json({ message: COM_NOT_FOUND_MESSAGE("user") });
+  }
+
+  try {
+    const verify = jwt.verify(token);
+
+    const encryptedPassword = await bcrypt.hash(password, 10);
+
+    await User.updateOne(
+      {
+        _id: id,
+      },
+      {
+        $set: {
+          password: encryptedPassword,
+        },
+      }
+    );
+    res.send("Verified");
+  } catch (error) {
+    res.send("Not Verified");
   }
 });
 
@@ -267,42 +374,43 @@ const addToCart = asyncHandler(async (req, res) => {
       .json({ error: "UserId, productId, and quantity are required" });
   }
   if (quantity < 1) {
-    return res.status(COMMON_UPDATE_FAIL).json({ error: "Quantity must be at least 1" });
+    return res
+      .status(COMMON_UPDATE_FAIL)
+      .json({ error: "Quantity must be at least 1" });
   }
   try {
     const product = await Product.findById(productId);
     if (!product) {
-      return res.status(COMMON_NOT_FOUND_CODE).json({ error: COM_NOT_FOUND_MESSAGE("product") });
+      return res
+        .status(COMMON_NOT_FOUND_CODE)
+        .json({ error: COM_NOT_FOUND_MESSAGE("product") });
     }
+
     const existingCartItem = await User.findOne({
       _id: userId,
       "cartItems.product": productId,
     });
-    if (existingCartItem ) {
-      
-        for(let i=0; i<existingCartItem?.cartItems?.length; i++){
-            if(product.countInStock>existingCartItem.cartItems[i].quantity){
-              await User.updateOne(
-                {
-                  _id: userId,
-                  "cartItems.product": productId,
-                },
-                {
-                  $inc: { "cartItems.$.quantity": quantity },
-                }
-              );
-              res.status(COMMON_SUCCESS_GET_CODE).json({
-                message: "Product quantity increase successfully",
-                product,
-              });
+    if (existingCartItem) {
+      for (let i = 0; i < existingCartItem?.cartItems?.length; i++) {
+        if (product.countInStock > existingCartItem.cartItems[i].quantity) {
+          await User.updateOne(
+            {
+              _id: userId,
+              "cartItems.product": productId,
+            },
+            {
+              $inc: { "cartItems.$.quantity": quantity },
             }
-            else {
-              res.json({ message: "Currently product is not available" });
-            }
+          );
+          res.status(COMMON_SUCCESS_GET_CODE).json({
+            message: "Product quantity increase successfully",
+            product,
+          });
+        } else {
+          res.json({ message: "Currently product is not available" });
         }
-      
+      }
     } else if (!existingCartItem && product.countInStock >= quantity) {
-   
       const cartItem = {
         product: product,
         quantity: quantity,
@@ -314,8 +422,7 @@ const addToCart = asyncHandler(async (req, res) => {
         message: COM_SUCCESS_POST_MESSAGE("product"),
         product: cartItem,
       });
-    } 
-    else {
+    } else {
       res.json({ message: "Currently product is not available" });
     }
   } catch (error) {
@@ -335,7 +442,9 @@ const removeFromCart = asyncHandler(async (req, res) => {
     };
 
     await User.findByIdAndUpdate(userId, { $pull: { cartItems: cartItem } });
-    res.status(COMMON_SUCCESS_GET_CODE).json("Product removed from cart successfully");
+    res
+      .status(COMMON_SUCCESS_GET_CODE)
+      .json("Product removed from cart successfully");
   } catch (error) {
     console.error(error);
     res.status(COMMON_INT_SERVER_CODE).json("Internal server error");
@@ -373,7 +482,9 @@ const displayCartItems = asyncHandler(async (req, res) => {
       res.send(COM_NOT_FOUND_MESSAGE("user"));
     }
   } catch (error) {
-    res.status(COMMON_UPDATE_FAIL).json({ message: "something went wwrong", error });
+    res
+      .status(COMMON_UPDATE_FAIL)
+      .json({ message: "something went wwrong", error });
     console.error(error);
   }
 });
@@ -420,19 +531,25 @@ const updateCartItemQuantity = asyncHandler(async (req, res) => {
     }
 
     if (newQuantity < 1) {
-      return res.status(COMMON_UPDATE_FAIL).json({ error: "New quantity must be at least 1" });
+      return res
+        .status(COMMON_UPDATE_FAIL)
+        .json({ error: "New quantity must be at least 1" });
     }
 
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(COMMON_NOT_FOUND_CODE).json({ error:COM_NOT_FOUND_MESSAGE("user") });
+      return res
+        .status(COMMON_NOT_FOUND_CODE)
+        .json({ error: COM_NOT_FOUND_MESSAGE("user") });
     }
 
     const cartItemIndex = user.cartItems.findIndex(
       (item) => item.product.toString() === productId
     );
     if (cartItemIndex === -1) {
-      return res.status(COMMON_NOT_FOUND_CODE).json({ error:COM_NOT_FOUND_MESSAGE("product") });
+      return res
+        .status(COMMON_NOT_FOUND_CODE)
+        .json({ error: COM_NOT_FOUND_MESSAGE("product") });
     }
 
     const updatedCartItems = [...user.cartItems];
@@ -443,23 +560,20 @@ const updateCartItemQuantity = asyncHandler(async (req, res) => {
     // Update the quantity
     if (newQuantity <= product.countInStock) {
       originalCartItem.quantity = newQuantity;
-    }
-    else{
-      res.json({message:"Currenty product not available"})
+    } else {
+      res.json({ message: "Currenty product not available" });
     }
     originalCartItem.product = product;
-    
+
     // console.log(originalCartItem, 'original cart items');
 
     // Save the updated user with the modified cartItems
     await user.save();
 
-    res
-      .status(COMMON_SUCCESS_GET_CODE)
-      .json({
-        message: "Quantity updated successfully",
-        changedItems: originalCartItem,
-      });
+    res.status(COMMON_SUCCESS_GET_CODE).json({
+      message: "Quantity updated successfully",
+      changedItems: originalCartItem,
+    });
   } catch (error) {
     console.error(error);
     res.status(COMMON_INT_SERVER_CODE).json({ error: "Internal server error" });
@@ -483,7 +597,9 @@ const favouriteItemAdd = asyncHandler(async (req, res) => {
   try {
     const product = await Product.findById(productId);
     if (!product) {
-      return res.status(COMMON_NOT_FOUND_CODE).json({ error: COM_NOT_FOUND_MESSAGE("product") });
+      return res
+        .status(COMMON_NOT_FOUND_CODE)
+        .json({ error: COM_NOT_FOUND_MESSAGE("product") });
     }
 
     const existingCartItem = await User.findOne({
@@ -500,12 +616,10 @@ const favouriteItemAdd = asyncHandler(async (req, res) => {
       $addToSet: { favoriteProducts: favourite },
     });
 
-    res
-      .status(COMMON_SUCCESS_GET_CODE)
-      .json({
-        message: COM_SUCCESS_POST_MESSAGE("product"),
-        favourite,
-      });
+    res.status(COMMON_SUCCESS_GET_CODE).json({
+      message: COM_SUCCESS_POST_MESSAGE("product"),
+      favourite,
+    });
   } catch (error) {
     console.error(error);
     res.status(COMMON_INT_SERVER_CODE).json({ error: "Internal server error" });
@@ -521,7 +635,9 @@ const favouriteItemRemove = asyncHandler(async (req, res) => {
     await User.findByIdAndUpdate(userId, {
       $pull: { favoriteProducts: { product: productId } },
     });
-    res.status(COMMON_SUCCESS_GET_CODE).json("Product removed from cart successfully");
+    res
+      .status(COMMON_SUCCESS_GET_CODE)
+      .json("Product removed from cart successfully");
   } catch (error) {
     console.error(error);
     res.status(COMMON_INT_SERVER_CODE).json("Internal server error");
@@ -582,4 +698,7 @@ export {
   favouriteItemRemove,
   updateCartItemQuantity,
   getUserProfileByid,
+  forgotPassword,
+  resetPassword,
+  updatePassword
 };

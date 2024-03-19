@@ -42,7 +42,6 @@ const getProducts = asyncHandler(async (req, res) => {
       return {
         ...prd.toObject(),
         isFavourite: favoriteProducts?.includes(prd._id.toString()),
-
       };
     });
 
@@ -57,10 +56,7 @@ const getProducts = asyncHandler(async (req, res) => {
 
     res.status(COMMON_SUCCESS_GET_CODE).json(products);
   }
-
 });
-
-
 
 const getProductById = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id);
@@ -97,8 +93,17 @@ const deleteProductById = asyncHandler(async (req, res) => {
 //@access Private
 
 const addProduct = asyncHandler(async (req, res) => {
-  const { name, price, image, category, description, brand, countInStock, user, isActive } =
-    req.body;
+  const {
+    name,
+    price,
+    image,
+    category,
+    description,
+    brand,
+    countInStock,
+    user,
+    isActive,
+  } = req.body;
 
   const products = new Product({
     name,
@@ -108,11 +113,10 @@ const addProduct = asyncHandler(async (req, res) => {
     description,
     brand,
     countInStock,
-    user : req.user._id,
-    isActive
+    user: req.user._id,
+    isActive,
   });
 
-  
   const createdProduct = await products.save();
   res.status(COMMON_SUCCESS_GET_CODE).json({ message: COM_SUCCESS_POST_MESSAGE("product"), createdProduct });
  
@@ -126,8 +130,7 @@ const addProduct = asyncHandler(async (req, res) => {
 const putUpdateProduct = asyncHandler(async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-   
-    
+
     if (product) {
       const updates = Object.keys(req.body);
       const allowedUpdates = [
@@ -142,14 +145,13 @@ const putUpdateProduct = asyncHandler(async (req, res) => {
         "numReviews",
         "price",
         "countInStock",
-        "isActive"
+        "isActive",
       ];
       const isValidOperation = updates.every((update) => {
         return allowedUpdates.includes(update);
       });
-     
+
       if (!isValidOperation) {
-        
         return res
           .status(COMMON_UPDATE_FAIL)
           .json({ status: "fail", message: "Invalid updates" });
@@ -157,7 +159,7 @@ const putUpdateProduct = asyncHandler(async (req, res) => {
       updates.forEach((update) => (product[update] = req.body[update]));
       await product.save();
 
-      io.emit('productUpdated', product);
+      io.emit("productUpdated", product);
 
 
       res.status(COMMON_SUCCESS_GET_CODE).json({ message: COM_SUCCESS_POST_MESSAGE("product"), product });
@@ -192,44 +194,36 @@ const updateProductCountInStock = asyncHandler(async (req, res) => {
 //All product that created by one user
 //private
 
-
 const getProductByUserId = asyncHandler(async (req, res) => {
-
   try {
-    const results = await Product.find({ user: req.user._id })
+    const results = await Product.find({ user: req.user._id });
     if (results) {
       res.status(COMMON_SUCCESS_GET_CODE).json(results)
     }
     else {
       res.json(COM_NOT_FOUND_MESSAGE("result"))
     }
-  }
-  catch (err) {
-  
-    res.json('something went wrong')
+  } catch (err) {
+    res.json("something went wrong");
   }
 });
 
 const getProductByParamsUserId = asyncHandler(async (req, res) => {
-
   try {
-    const results = await Product.find({ user: req.params.id })
+    const results = await Product.find({ user: req.params.id });
     if (results) {
       res.status(COMMON_SUCCESS_GET_CODE).json(results)
     }
     else {
       res.json(COM_NOT_FOUND_MESSAGE("result"))
     }
-  }
-  catch (err) {
-   
-    res.json('something went wrong')
+  } catch (err) {
+    res.json("something went wrong");
   }
 });
 
-
 const updateStatusOfProductActive = asyncHandler(async (req, res) => {
-  const isExists = await Product.findById(req.params.id)
+  const isExists = await Product.findById(req.params.id);
   if (isExists) {
     isExists.isActive = !isExists.isActive
     isExists.save()
@@ -238,16 +232,16 @@ const updateStatusOfProductActive = asyncHandler(async (req, res) => {
   else {
     res.status(COMMON_NOT_FOUND_CODE).json({ message: COM_NOT_FOUND_MESSAGE("product") })
   }
-})
+});
 
 const updateNumOfReviews = asyncHandler(async (req, res) => {
    const product = await Product.findById(req.params.id)
- 
+
     const {rating} = req.body;
    try{
     if(product){
-      product.numReviews+=1
-      product.rating=rating
+      product.numReviews+=rating
+      const usersReview=//product.rating=rating
 
       await product.save()
        res.json({message:"Rating Updated Successfully", product})
@@ -314,6 +308,5 @@ export {
   getProductByParamsUserId,
   updateNumOfReviews,
   addReviews,
-  updateProductCountInStock
+  updateProductCountInStock,
 };
-
