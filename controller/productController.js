@@ -271,7 +271,6 @@ const addReviews = asyncHandler(async (req, res) => {
     rating,
   };
 
-  console.log(req.body , " ppppppppppppppppppppppp  ")
 
   try {
     if (product) {
@@ -292,13 +291,13 @@ const addReviews = asyncHandler(async (req, res) => {
       await product.save();
       res.json({ message: "Rating Updated Successfully", product });
     } else {
-      res.json({ message: "Product not found" });
-      await product.save()
-       res.json({message:COM_SUCCESS_POST_MESSAGE("product"), product})
+      res.json({message: COM_NOT_FOUND_MESSAGE("product")});
+      // await product.save()
+      //  res.json({message:COM_SUCCESS_POST_MESSAGE("product"), product})
     }
-    else{
-      res.json({message: COM_NOT_FOUND_MESSAGE("product")})
-    }
+    // else{
+    //   res.json({message: COM_NOT_FOUND_MESSAGE("product")})
+    // }
   } catch (err) {
     res.json({ error: err });
   }

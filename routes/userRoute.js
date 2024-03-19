@@ -17,6 +17,8 @@ import {
   getUserProfileByid,
 
 } from "../controller/userController.js";
+
+import { forgotPassword, resetPassword, updatePassword } from "../controller/emailSend.js";
 import { protect } from "../middleware/authMiddleware.js";
 import passport from "../controller/googleAuthController.js";
 //import passport from "passport";
@@ -52,6 +54,14 @@ passport.authenticate('google', { failureRedirect: '/login' }),
     res.json({ message: "Signup successfully", user: req.user });
   }
 );
+
+router.post('/forgot-password/:id', forgotPassword);
+
+// Route for rendering password reset page
+router.get('/reset-password/:id/:token', resetPassword);
+
+// Route for updating password
+router.put('/update-password/:id', updatePassword);
 
 export default router;
 

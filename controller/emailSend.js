@@ -1,3 +1,6 @@
+import  nodemailer from 'nodemailer';
+import asyncHandler from "express-async-handler";
+import User from '../models/userModel.js';
 const forgotPassword = asyncHandler(async (req, res) => {
     const { id } = req.params;
     try {
@@ -62,3 +65,10 @@ const forgotPassword = asyncHandler(async (req, res) => {
       console.error("Error sending email:", error);
     }
   };
+
+
+  export {
+    forgotPassword,
+    resetPassword,
+    updatePassword
+  }
