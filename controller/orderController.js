@@ -3,6 +3,15 @@ import Order from "../models/orderModel.js";
 import User from "../models/userModel.js";
 import Product from "../models/productModel.js";
 
+import {
+  COMMON_NOT_FOUND_CODE,
+    COMMON_SUCCESS_GET_CODE,
+    COM_NOT_FOUND_MESSAGE,
+    COMMON_INT_SERVER_CODE,
+    COMMON_UPDATE_FAIL,
+    COM_SUCCESS_POST_MESSAGE,
+} from '../statusCodeResponse/index.js'
+
 // @desc Create new order
 //@route POST /api/orders
 //@access Private
@@ -21,9 +30,10 @@ const addOrderItems = asyncHandler(async (req, res) => {
 
   const productData = await Product.findById(cartItems._id);
 
+  
  console.log(req.body,'req body 99999999999999999999999999999999999999999999999999999999999')
   if (cartItems && cartItems.length === 0) {
-    res.status(400);
+    res.status(COMMON_NOT_FOUND_CODE);
     throw new Error("No order items");
   } else if (userExists.isActive == true) {
     const order = new Order({
@@ -39,7 +49,7 @@ const addOrderItems = asyncHandler(async (req, res) => {
     });
     const orderCreated = await order.save();
 
-    res.status(201).json(orderCreated);
+    res.status(COMMON_SUCCESS_GET_CODE).json(orderCreated);
   } else {
     res.json({ message: "Something went wrong please try again later" });
   }
@@ -61,8 +71,8 @@ const getOrderByUserId = asyncHandler(async (req, res) => {
     res.json(order);
   } else {
     console.log("errrrrr");
-    res.status(404);
-    throw new Error("Order not found");
+    res.status(COMMON_NOT_FOUND_CODE);
+    throw new Error(COM_NOT_FOUND_MESSAGE("orders"));
   }
 });
 
