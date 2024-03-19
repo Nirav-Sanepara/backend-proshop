@@ -30,6 +30,7 @@ const getProducts = asyncHandler(async (req, res) => {
   ) {
     const token = req.headers.authorization.split(" ")[1];
     const decode = jwt.verify(token, process.env.JWT_SECRET);
+    console.log(decode)
     req.user = await User.findById(decode.id).select("-password");
   }
 

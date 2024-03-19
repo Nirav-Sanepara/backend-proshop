@@ -255,66 +255,66 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   }
 });
 
-const forgotPassword = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.params.id);
+// const forgotPassword = asyncHandler(async (req, res) => {
+//   const user = await User.findById(req.params.id);
 
-  try {
-    if (!user) {
-      return res
-        .status(COMMON_NOT_FOUND_CODE)
-        .json({ message: COM_NOT_FOUND_MESSAGE("user") });
-    }
+//   try {
+//     if (!user) {
+//       return res
+//         .status(COMMON_NOT_FOUND_CODE)
+//         .json({ message: COM_NOT_FOUND_MESSAGE("user") });
+//     }
 
-    const token = generateToken(user._id);
-    const link = "http://localhost:3000/resetPassword/${user._id}/${token}";
+//     const token = generateToken(user._id);
+//     const link = "http://localhost:3000/resetPassword/${user._id}/${token}";
 
-    var transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: "istra0802@gmail.com",
-        pass: "ishasojitra2002",
-      },
-    });
+//     var transporter = nodemailer.createTransport({
+//       service: "gmail",
+//       auth: {
+//         user: "istra0802@gmail.com",
+//         pass: "ishasojitra2002",
+//       },
+//     });
 
-    var mailOptions = {
-      from: "istra0802@gmail.com",
-      to: "istra0802@gmail.com",
-      subject: "Password Reset",
-      text: link,
-    };
+//     var mailOptions = {
+//       from: "istra0802@gmail.com",
+//       to: "istra0802@gmail.com",
+//       subject: "Password Reset",
+//       text: link,
+//     };
 
-    transporter.sendMail(mailOptions, function (error, info) {
-      if (error) {
-        console.log(error);
-      } else {
-        console.log("Email sent: " + info.response);
-      }
-    });
+//     transporter.sendMail(mailOptions, function (error, info) {
+//       if (error) {
+//         console.log(error);
+//       } else {
+//         console.log("Email sent: " + info.response);
+//       }
+//     });
 
-    console.log(link, " link ===========================================");
-  } catch (error) {}
-});
+//     console.log(link, " link ===========================================");
+//   } catch (error) {}
+// });
 
-const resetPassword = asyncHandler(async (req, res) => {
-  const { id, token } = req.params;
-  console.log(req.params);
+// const resetPassword = asyncHandler(async (req, res) => {
+//   const { id, token } = req.params;
+//   console.log(req.params);
 
-  const user = await User.findById({ _id: id });
+//   const user = await User.findById({ _id: id });
 
-  if (!user) {
-    return res
-      .status(COMMON_NOT_FOUND_CODE)
-      .json({ message: COM_NOT_FOUND_MESSAGE("user") });
-  }
+//   if (!user) {
+//     return res
+//       .status(COMMON_NOT_FOUND_CODE)
+//       .json({ message: COM_NOT_FOUND_MESSAGE("user") });
+//   }
 
-  try {
-    const verify = jwt.verify(token);
-    res.render("index", { email: verify.email });
-    res.send("Verified");
-  } catch (error) {
-    res.send("Not Verified");
-  }
-});
+//   try {
+//     const verify = jwt.verify(token);
+//     res.render("index", { email: verify.email });
+//     res.send("Verified");
+//   } catch (error) {
+//     res.send("Not Verified");
+//   }
+// });
 
 const updatePassword = asyncHandler(async (req, res) => {
   const { id, token } = req.params;
@@ -681,6 +681,62 @@ const displayFavouriteItems = asyncHandler(async (req, res) => {
     console.error(error);
   }
 });
+
+
+const forgotPassword = asyncHandler(async(req,res)=>{
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+        return res.status(404).json({ message: 'Email not found' });
+    }
+
+    const token = crypto.randomBytes(20).toString('hex');
+    await PasswordResetToken.create({ user: user._id, token });
+
+    const transporter = nodemailer.createTransport(config.mailer);
+    const mailOptions = {
+        from: config.mailer.auth.user,
+        to: email,
+        subject: 'Password Reset',
+        text: `${config.baseUrl}/reset-password/${token}`
+    };
+
+    transporter.sendMail(mailOptions, (err) => {
+        if (err) {
+            console.log(err);
+            return res.status(500).json({ message: 'Failed to send email' });
+        }
+        res.json({ message: 'Password reset email sent' });
+    });
+} catch (err) {
+    console.log(err);
+    res.status(500).json({ message: 'Internal server error' });
+}
+})
+
+const resetPassword = asyncHandler(async(req,res)=>{
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    const resetToken = await PasswordResetToken.findOne({ token });
+    if (!resetToken) {
+        return res.status(400).json({ message: 'Invalid or expired token' });
+    }
+
+    const user = await User.findById(resetToken.user);
+    user.password = password;
+    await user.save();
+
+    await resetToken.remove();
+
+    res.json({ message: 'Password reset successfully' });
+} catch (err) {
+    console.log(err);
+    res.status(500).json({ message: 'Internal server error' });
+}
+})
 
 export {
   authUser,

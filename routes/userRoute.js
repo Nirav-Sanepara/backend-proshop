@@ -16,16 +16,16 @@ import {
   updateCartItemQuantity,
   getUserProfileByid,
   forgotPassword,
-
+ resetPassword
 } from "../controller/userController.js";
 
-import { forgotPassword, resetPassword, updatePassword } from "../controller/emailSend.js";
+// import { forgotPassword, resetPassword, updatePassword } from "../controller/emailSend.js";
 import { protect } from "../middleware/authMiddleware.js";
 import passport from "../controller/googleAuthController.js";
 //import passport from "passport";
 
 const router = express.Router();
-
+// router.put('/',protect) 
 router.route("/").post(registerUserActive);
 router.post("/login", authUser);
  
@@ -64,7 +64,7 @@ router.post('/forgot-password/:id', forgotPassword);
 router.get('/reset-password/:id/:token', resetPassword);
 
 // Route for updating password
-router.put('/update-password/:id', updatePassword);
+// router.put('/update-password/:id', updatePassword);
 
 export default router;
 
