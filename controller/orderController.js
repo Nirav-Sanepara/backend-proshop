@@ -94,6 +94,7 @@ const returnOrder = asyncHandler(async (req, res) => {
     const orderId = req.params.id;
     const { reason, return_date } = req.body; // Assuming reason and return_date are sent in the request body
     const order = await Order.findById(orderId);
+    console.log(order,"============================================================")
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }

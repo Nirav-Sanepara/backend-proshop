@@ -215,11 +215,20 @@ const getUserProfileByid = asyncHandler(async (req, res) => {
 const updateUserProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
 
+  const isValidate = yup.object({
+    name: yup.string().min(1).required(),
+    email: yup.string().email().required(),
+    password: yup.string().required(),
+   
+  });
+
+  const yupUser = await isValidate.validate(req.body);
+
   if (user) {
-    user.name = req.body.name || user.name;
-    user.email = req.body.email || user.email;
-    if (req.body.password) {
-      user.password = req.body.password;
+    user.name = yupUser.name || user.name;
+    user.email = yupUser.email || user.email;
+    if (yupUser.password) {
+      user.password = yupUser.password;
     }
 
     const updateUser = await user.save();
@@ -262,8 +271,8 @@ const forgotPassword = asyncHandler(async (req, res) => {
     var transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: "adarsh438tcsckandivali@gmail.com",
-        pass: "rmdklolcsmswvyfw",
+        user: "istra0802@gmail.com",
+        pass: "ishasojitra2002",
       },
     });
 
@@ -672,4 +681,7 @@ export {
   favouriteItemRemove,
   updateCartItemQuantity,
   getUserProfileByid,
+  forgotPassword,
+  resetPassword,
+  updatePassword
 };
