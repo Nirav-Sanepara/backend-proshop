@@ -26,26 +26,26 @@ import passport from "../controller/googleAuthController.js";
 
 const router = express.Router();
 // router.put('/',protect) 
-router.route("/").post(registerUserActive);
-router.post("/login", authUser);
+router.route("/").post(registerUserActive); /////////////////////////
+router.post("/login", authUser);    //////////////////////////////
  
-router.put('/:id',protect,userProfileSoftDelete) 
-router.get('/cartlist',protect,displayCartItems)
+router.put('/:id',protect,userProfileSoftDelete) /////////////////////////////////
+router.get('/cartlist',protect,displayCartItems)  ////////////////////////////////////
 router.get('/favouritelist',protect,displayFavouriteItems)
-router.post('/addTocart',protect,addToCart)
-router.post('/removecart',protect,removeFromCart)
-router.post('/addTofavourite',protect,favouriteItemAdd)
-router.post('/removeFav',protect,favouriteItemRemove)
-router.post('/updateqty', updateCartItemQuantity)
+router.post('/addTocart',protect,addToCart) //////////////////////////////////
+router.post('/removecart',protect,removeFromCart) ///////////////////////////
+router.post('/addTofavourite',protect,favouriteItemAdd)/////////////////////////////
+router.post('/removeFav',protect,favouriteItemRemove) ///////////////////////////////
+router.post('/updateqty', updateCartItemQuantity)////////////////////////////////////////
 
 
 
-router.route("/").get(protect, allUserDataGetting)
+router.route("/").get(protect, allUserDataGetting) /////////////////////////////
 
-router.route("/profile").get(protect, getUserProfile);
-router.put("/profile/:id", updateUserProfile);
+router.route("/profile").get(protect, getUserProfile); ///////////////////////////////////////////
+router.put("/profile/:id", updateUserProfile); ///////////////////////
 
-router.get('/profile/:id',getUserProfileByid)
+router.get('/profile/:id',getUserProfileByid)  ////////////////////////////////////
 router.get('/google',
 passport.authenticate('google', { scope: ['profile', 'email'] })
 );

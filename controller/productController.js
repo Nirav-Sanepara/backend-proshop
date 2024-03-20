@@ -163,7 +163,7 @@ const putUpdateProduct = asyncHandler(async (req, res) => {
       io.emit("productUpdated", product);
 
 
-      res.status(COMMON_SUCCESS_GET_CODE).json({ message: COM_SUCCESS_POST_MESSAGE("product"), product });
+      res.status(COMMON_SUCCESS_GET_CODE).json({ message: "Product updated successfully", product });
     } else {
       res.status(COMMON_NOT_FOUND_CODE).json({ message: COM_NOT_FOUND_MESSAGE("Product")});
     }
@@ -228,7 +228,7 @@ const updateStatusOfProductActive = asyncHandler(async (req, res) => {
   if (isExists) {
     isExists.isActive = !isExists.isActive
     isExists.save()
-    res.status(COMMON_SUCCESS_GET_CODE).json({ message: COM_SUCCESS_POST_MESSAGE("product"), isExists })
+    res.status(COMMON_SUCCESS_GET_CODE).json({ message: "Product status updated successfully", isExists })
   }
   else {
     res.status(COMMON_NOT_FOUND_CODE).json({ message: COM_NOT_FOUND_MESSAGE("product") })

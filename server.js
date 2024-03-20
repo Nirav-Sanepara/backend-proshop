@@ -33,7 +33,7 @@ app.get("/", (req, res) => {
   res.send("api running");
 });
 
-console.log(server," 77777777777777777",io, " e44444444444444444444444444444444444");
+// console.log(server," 77777777777777777",io, " e44444444444444444444444444444444444");
 server.listen(
   PORT,
   console.log(
