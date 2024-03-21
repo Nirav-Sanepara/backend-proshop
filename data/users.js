@@ -28,7 +28,7 @@ const users = [
   },
   {
     name: "Admin",
-    email: "admin@gamil.com",
+    email: "admin@gmail.com",
     role:"admin",
     password: bcrypt.hashSync("123", 10),
     isActive: true,
