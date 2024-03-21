@@ -36,16 +36,16 @@ router.post('/addTocart',protect,addToCart) //////////////////////////////////
 router.post('/removecart',protect,removeFromCart) ///////////////////////////
 router.post('/addTofavourite',protect,favouriteItemAdd)/////////////////////////////
 router.post('/removeFav',protect,favouriteItemRemove) ///////////////////////////////
-router.post('/updateqty', updateCartItemQuantity)////////////////////////////////////////
+router.post('/updateqty', updateCartItemQuantity)
 
 
 
-router.route("/").get(protect, allUserDataGetting) /////////////////////////////
+router.route("/").get(protect, allUserDataGetting) 
 
-router.route("/profile").get(protect, getUserProfile); ///////////////////////////////////////////
-router.put("/profile/:id", updateUserProfile); ///////////////////////
+router.route("/profile").get(protect, getUserProfile); 
+router.put("/profile/:id", updateUserProfile); 
 
-router.get('/profile/:id',getUserProfileByid)  ////////////////////////////////////
+router.get('/profile/:id',getUserProfileByid)  
 router.get('/google',
 passport.authenticate('google', { scope: ['profile', 'email'] })
 );
