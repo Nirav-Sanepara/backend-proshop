@@ -27,13 +27,14 @@ app.use(passport.initialize());
 const PORT = process.env.PORT || 5000;
 
 // Call createSocketServer and pass 'app' as a parameter
-const { io, server } = createSocketServer(app);
+
 
 app.get("/", (req, res) => {
   res.send("api running");
 });
 
-// console.log(server," 77777777777777777",io, " e44444444444444444444444444444444444");
+const { io, server } = createSocketServer(app);
+
 server.listen(
   PORT,
   console.log(
@@ -41,4 +42,6 @@ server.listen(
       .bold
   )
 );
+
+// console.log(server," 77777777777777777", io, "e44444444444444444444444444444444444");
 

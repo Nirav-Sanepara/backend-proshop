@@ -47,6 +47,7 @@ const getProducts = asyncHandler(async (req, res) => {
     });
 
     res.status(COMMON_SUCCESS_GET_CODE).json(products)
+    io.emit('getProducts',products)
   }
   else {
     products = products.map((prd) => ({
@@ -56,6 +57,7 @@ const getProducts = asyncHandler(async (req, res) => {
 
 
     res.status(COMMON_SUCCESS_GET_CODE).json(products);
+    io.emit('getProducts',products)
   }
 });
 
@@ -120,7 +122,7 @@ const addProduct = asyncHandler(async (req, res) => {
 
   const createdProduct = await products.save();
   res.status(COMMON_SUCCESS_GET_CODE).json({ message: COM_SUCCESS_POST_MESSAGE("product"), createdProduct });
- 
+   io.emit('addProduct',createdProduct)
 
 });
 

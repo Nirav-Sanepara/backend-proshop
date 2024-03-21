@@ -1,6 +1,6 @@
 import asyncHandler from "express-async-handler";
- import {Razorpay} from 'razorpay' 
- 
+ import Razorpay from 'razorpay' 
+
   const razorpay = new Razorpay({
     key_id: `rzp_test_SKCq7lMIkCvIWp`,
     key_secret: `90Hs1bpeEvP8ooBMyHj4ixlq`,

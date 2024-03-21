@@ -5,6 +5,7 @@ import Product from "../models/productModel.js";
 import yup, { string } from "yup";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import createSocketServer from '../utils/socket.js'
 
 import {
   COMMON_NOT_FOUND_CODE,
@@ -16,6 +17,7 @@ import {
 } from "../statusCodeResponse/index.js";
 import bcrypt from "bcryptjs/dist/bcrypt.js";
 
+const {io,server} = createSocketServer()
 // @desc Auth user and get token
 //@route POST /api/users/login
 //@access Public
@@ -144,6 +146,7 @@ const registerUserActive = asyncHandler(async (req, res) => {
         role: newUser.role,
         token: generateToken(newUser._id),
       });
+      io.emit("addUser", newUser);
     } else {
       res.status(COMMON_UPDATE_FAIL).send({ message: "Invalid user data" });
     }
@@ -239,6 +242,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       email: updateUser.email,
       role: user.role,
     });
+    io.emit('updateUser',updateUser)
   } else {
     res
       .status(COMMON_NOT_FOUND_CODE)

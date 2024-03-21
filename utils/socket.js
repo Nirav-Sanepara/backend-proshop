@@ -1,26 +1,28 @@
 import http from "http";
 import { Server } from "socket.io";
-
+// import configureSocket from "../socket/user.socket.js";
 // Modify the export statement to accept 'app' as a parameter
+import mainSocketData from "../socket/index.js";
 export default function createSocketServer(app) {
   const server = http.createServer(app);
   const io = new Server(server, {
     cors: {
       origin: "*",
-      methods: ["GET", "POST"],
+      methods: ["GET", "POST", "PATCH", "PUT"],
     },
   });
   io.on("connection", (socket) => {
     console.log("A user connected --------------------------");
-
-    // // Emit an event to the client
+     mainSocketData(socket,io)
+   
     socket.emit("hello",{ message: "Welcome to my website" });
-
-    // // Handling incoming events from the client
-    // socket.on("clientEvent", (data) => {
-    //   console.log("Received data from client:", data);
-    // });
+    
+    socket.on("clientEvent", (data) => {
+      console.log("Received data from client:", data);
+    });
   });
+
+
 
   return { io, server };
 }
