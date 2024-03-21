@@ -1,6 +1,11 @@
 export default function configureSocket(socket, io) {
-    socket.on("broadcastUserAdd", (data) =>
-        socket.broadcast.emit("addUser", data)
+    var items =[]
+    socket.on("broadcastUserAdd", async(data) =>
+        {
+        const allUser = await io.sockets.fetchSockets();
+        allUser.push(data)
+        socket.broadcast.emit("addUser", data);
+        }
     );
     socket.on("broadcastUserUpdate", async (data) => {
         socket.broadcast.emit("updateUser", data);

@@ -10,8 +10,9 @@ import cors from "cors";
 import passport from "./controller/googleAuthController.js";
 // Import the modified createSocketServer function
 import createSocketServer from "./utils/socket.js";
-
 const app = express();
+const { io, server } = createSocketServer(app);
+
 dotenv.config();
 
 connectDB();
@@ -33,7 +34,7 @@ app.get("/", (req, res) => {
   res.send("api running");
 });
 
-const { io, server } = createSocketServer(app);
+
 
 server.listen(
   PORT,
