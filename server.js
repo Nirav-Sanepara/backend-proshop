@@ -7,7 +7,7 @@ import connectDB from "./config/db.js";
 import colors from "colors";
 import { errHandler, notFound } from "./middleware/errmiddleware.js";
 import cors from "cors";
-
+import passport from "./controller/googleAuthController.js";
 // Import the modified createSocketServer function
 import createSocketServer from "./utils/socket.js";
 
@@ -20,18 +20,20 @@ app.use(cors());
 app.use("/api/products", productRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/orders", orderRoutes);
-
+app.use(passport.initialize());
 // app.use(notFound);
 // app.use(errHandler);  api/'products/myproducts
 
 const PORT = process.env.PORT || 5000;
 
 // Call createSocketServer and pass 'app' as a parameter
-const { io, server } = createSocketServer(app);
+
 
 app.get("/", (req, res) => {
   res.send("api running");
 });
+
+const { io, server } = createSocketServer(app);
 
 server.listen(
   PORT,
@@ -40,3 +42,6 @@ server.listen(
       .bold
   )
 );
+
+// console.log(server," 77777777777777777", io, "e44444444444444444444444444444444444");
+
