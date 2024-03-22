@@ -1,19 +1,18 @@
 import asyncHandler from "express-async-handler";
- import Razorpay from 'razorpay' 
-
+ import Razorpay from 'razorpay'
   const razorpay = new Razorpay({
     key_id: `rzp_test_SKCq7lMIkCvIWp`,
     key_secret: `90Hs1bpeEvP8ooBMyHj4ixlq`,
   });
-  
   const createOrderId = asyncHandler(async(req,res)=>{
-    const amount = 1000; // Amount in paisa
+    const { totalPrice } = req.body;
+    // Convert totalPrice to paisa or smallest currency unit
+    const amount = totalPrice * 100;
     const options = {
         amount: amount,
         currency: 'INR',
         receipt: 'order_rcptid_11'
     };
-    
     razorpay.orders.create(options, (err, order) => {
         if(err) {
             console.log(err);
@@ -22,8 +21,6 @@ import asyncHandler from "express-async-handler";
         res.json({ order_id: order.id });
     });
   })
-
-
   const  refundPayment = asyncHandler(async(req,res)=>{
     try {
       const { paymentId, amount } = req.body;
@@ -35,8 +32,18 @@ import asyncHandler from "express-async-handler";
       res.status(500).json({ success: false, error: error.message });
     }
   })
-
   export {
     createOrderId,
     refundPayment
   }
+
+
+
+
+
+
+
+
+
+
+

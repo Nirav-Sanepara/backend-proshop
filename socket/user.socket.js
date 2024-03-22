@@ -1,10 +1,10 @@
 export default function configureSocket(socket, io) {
-    var items =[]
+    
     socket.on("broadcastUserAdd", async(data) =>
         {
-        const allUser = await io.sockets.fetchSockets();
-        allUser.push(data)
-        socket.broadcast.emit("addUser", data);
+        console.log(data,'broad cast emittinggggggggggggggggggggggggggggggggggggg')
+        const dataDet=socket.broadcast.emit("addUser", data);
+        console.log(dataDet,'900909090900909090909000000000000000000000000000000000000000000000000000000000000000')
         }
     );
     socket.on("broadcastUserUpdate", async (data) => {
@@ -48,4 +48,7 @@ export default function configureSocket(socket, io) {
             socket.handshake.session.save();
         }
     });
+    socket.on('getUser',(data)=>{
+        console.log(data,'allUerGet data')
+    })
 }

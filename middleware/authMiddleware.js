@@ -21,7 +21,7 @@ const protect = asyncHandler(async (req, res, next) => {
       next();
     }
   } catch (error) {
-    console.error(error);
+    console.error(error,'error');
     res.status(401);
     throw new Error("not authorized , no Token");
   }

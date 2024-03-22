@@ -146,7 +146,7 @@ const registerUserActive = asyncHandler(async (req, res) => {
         role: newUser.role,
         token: generateToken(newUser._id),
       });
-      io.emit("addUser", newUser);
+      // io.emit("broadcastUserAdd", newUser);
     } else {
       res.status(COMMON_UPDATE_FAIL).send({ message: "Invalid user data" });
     }
@@ -361,6 +361,7 @@ const allUserDataGetting = asyncHandler(async (req, res) => {
     let results = await User.find();
 
     res.json(results);
+    
   } catch (err) {
     res.json({ message: "Something went wrong" });
   }

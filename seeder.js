@@ -30,7 +30,7 @@ const importData = async () => {
     console.log("Data Inserted !".green.inverse);
     process.exit();
   } catch (error) {
-    console.error(`${error}`.red.inverse);
+    console.error(`${error}`.red.inverse,'error from seeder');
     process.exit(1);
   }
 };
@@ -44,7 +44,7 @@ const destroyData = async () => {
     console.log("Data destroyed !".red.inverse);
     process.exit();
   } catch (error) {
-    console.error(`${error}`.red.inverse);
+    console.error(`${error}`.red.inverse,'error from seeder2');
     process.exit(1);
   }
 };

@@ -3,6 +3,7 @@ import { Server } from "socket.io";
 // import configureSocket from "../socket/user.socket.js";
 // Modify the export statement to accept 'app' as a parameter
 import mainSocketData from "../socket/index.js";
+import configureSocket from "../socket/user.socket.js";
 export default function createSocketServer(app) {
   const server = http.createServer(app);
   const io = new Server(server, {
@@ -13,8 +14,9 @@ export default function createSocketServer(app) {
   });
   io.on("connection", (socket) => {
     console.log("A user connected --------------------------");
-     mainSocketData(socket,io)
-   
+    //  mainSocketData(socket,io)
+     configureSocket(socket,io)
+
     socket.emit("hello",{ message: "Welcome to my website" });
     
     socket.on("clientEvent", (data) => {
