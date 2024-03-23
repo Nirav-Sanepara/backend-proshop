@@ -41,7 +41,7 @@ const productSchema = new Schema(
     },
     price: number().required(),
     countInStock: number().required().default(0),
-
+   
     isActive: {
       type: Boolean,
       required: true,

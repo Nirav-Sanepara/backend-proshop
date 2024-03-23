@@ -1,5 +1,5 @@
 import asyncHandler from "express-async-handler";
- import {Razorpay} from 'razorpay' 
+ import Razorpay from 'razorpay' 
  
   const razorpay = new Razorpay({
     key_id: `rzp_test_SKCq7lMIkCvIWp`,
@@ -7,7 +7,10 @@ import asyncHandler from "express-async-handler";
   });
   
   const createOrderId = asyncHandler(async(req,res)=>{
-    const amount = 1000; // Amount in paisa
+    const { totalPrice } = req.body;
+
+    // Convert totalPrice to paisa or smallest currency unit
+    const amount = totalPrice * 100;
     const options = {
         amount: amount,
         currency: 'INR',
