@@ -16,6 +16,7 @@ import {
   updateCartItemQuantity,
   getUserProfileByid,
   forgotPassword,
+  resetPassword,
 
 } from "../controller/userController.js";
 import { protect } from "../middleware/authMiddleware.js";
@@ -35,9 +36,8 @@ router.post('/removecart',protect,removeFromCart)
 router.post('/addTofavourite',protect,favouriteItemAdd)
 router.post('/removeFav',protect,favouriteItemRemove)
 router.post('/updateqty', updateCartItemQuantity)
-
-
-
+router.post('/forgot-password/:email', forgotPassword);
+router.patch('/reset-password/:id/:token', resetPassword);
 router.route("/").get(protect, allUserDataGetting)
 
 router.route("/profile").get(protect, getUserProfile);

@@ -3,6 +3,9 @@ import Product from "../models/productModel.js";
 import jwt from "jsonwebtoken";
 import User from "../models/userModel.js";
 import createSocketServer from "../utils/socket.js";
+// const nodemailer = require("nodemailer");
+import nodemailer from "nodemailer";
+
 
 import {
   COMMON_NOT_FOUND_CODE,

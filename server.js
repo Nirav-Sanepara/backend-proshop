@@ -30,10 +30,9 @@ const PORT = process.env.PORT || 5000;
 const { io, server } = createSocketServer(app);
 
 app.get("/", (req, res) => {
-  res.send("api running");
+  res.send(`<h2>api running</h2>`);
 });
 
-console.log(server," 77777777777777777",io, " e44444444444444444444444444444444444");
 server.listen(
   PORT,
   console.log(
@@ -41,4 +40,8 @@ server.listen(
       .bold
   )
 );
+console.log(server," 77777777777777777", " e44444444444444444444444444444444444");
+
+
+
 

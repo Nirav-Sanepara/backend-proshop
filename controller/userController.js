@@ -3,6 +3,8 @@ import User from "../models/userModel.js";
 import generateToken from "../utils/generateToken.js";
 import Product from "../models/productModel.js";
 import yup, { string } from "yup";
+import nodemailer from "nodemailer";
+import crypto from "crypto";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 
@@ -19,6 +21,74 @@ import bcrypt from "bcryptjs/dist/bcrypt.js";
 // @desc Auth user and get token
 //@route POST /api/users/login
 //@access Public
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: "istra0802@gmail.com", // Replace with your Gmail email
+    pass: "vdya hlyq cueu vkyb", // Replace with your Gmail password
+  },
+});
+
+const sendEmail = async (email, subject, text) => {
+  try {
+    await transporter.sendMail({
+      from: "istra0802@gmail.com", // Replace with your Gmail email
+      to: email,
+      subject: "regarding forgetting password ",
+      html: `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>User Registration</title>
+      </head>
+      <body>
+          <h1>User Registration</h1>
+          <p>Thank you for registering with us!</p>
+          
+          <p>
+          
+          We’re sending this email to confirm that your account at Proshop was created successfully.
+          </p>
+      
+          <p>
+          
+          We hope you will be happy with products offered by the Proshop and that you will shop with us again and again.
+          </p>
+          
+          <p>
+          
+          Our goal is to offer the widest range of products offered by the Proshop at the highest quality. If you think we should add any items to our store, don’t hesitate to contact us and share your feedback.
+          </p>
+          
+         <p>
+         
+         Click this link to log in to your account and start shopping:
+         </p> 
+          <p>You can login to your account <a href="http://localhost:3000/login">here</a>.</p>
+          
+         <p>
+         
+         It’s great that you are now a part of the Proshop family!
+         </p> 
+          
+          <p>
+          
+          Cheers,
+          </p>
+          <p> Proshop’s Customer Service Team</p>
+        
+      </body>
+      </html>
+  `,
+    });
+    console.log("Email sent successfully");
+  } catch (error) {
+    console.error("Error sending email:", error);
+  }
+};
 
 const authUser = asyncHandler(async (req, res) => {
   const isValidate = yup.object({
@@ -144,6 +214,12 @@ const registerUserActive = asyncHandler(async (req, res) => {
         role: newUser.role,
         token: generateToken(newUser._id),
       });
+
+      // Send email notification
+      const userEmail = newUser.email; // Assuming user's email is stored in the User model
+      const subject = "Successful Registeration";
+
+      sendEmail(userEmail, subject);
     } else {
       res.status(COMMON_UPDATE_FAIL).send({ message: "Invalid user data" });
     }
@@ -219,7 +295,6 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     name: yup.string().min(1).required(),
     email: yup.string().email().required(),
     password: yup.string().required(),
-   
   });
 
   const yupUser = await isValidate.validate(req.body);
@@ -256,97 +331,61 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 });
 
 const forgotPassword = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.params.id);
-
   try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
     if (!user) {
-      return res
-        .status(COMMON_NOT_FOUND_CODE)
-        .json({ message: COM_NOT_FOUND_MESSAGE("user") });
+      return res.status(404).json({ message: "Email not found" });
     }
-
     const token = generateToken(user._id);
-    const link = "http://localhost:3000/resetPassword/${user._id}/${token}";
-
-    var transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: "istra0802@gmail.com",
-        pass: "ishasojitra2002",
-      },
-    });
-
-    var mailOptions = {
-      from: "istra0802@gmail.com",
-      to: "istra0802@gmail.com",
-      subject: "Password Reset",
-      text: link,
-    };
-
-    transporter.sendMail(mailOptions, function (error, info) {
-      if (error) {
-        console.log(error);
-      } else {
-        console.log("Email sent: " + info.response);
-      }
-    });
-
-    console.log(link, " link ===========================================");
-  } catch (error) {}
+    // const transporter = nodemailer.createTransport(config.mailer);
+    // const mailOptions = {
+    //   from: 'istra0802@gmail.com',
+    //   to: email,
+    //   subject: "Password Reset",
+    //   text: 'forgot passsword',
+    // };
+    //  `${config.baseUrl}/reset-password/${token}`
+    // transporter.sendMail(mailOptions, (err) => {
+    //   if (err) {
+    //     console.log(err);
+    //     return res.status(500).json({ message: "Failed to send email" });
+    //   }
+    //   res.json({ message: "Password reset email sent" });
+    // });
+    const link = `http://localhost:3000/resetPassword/${user._id}/${token}`;
+    const userEmail = user.email; // Assuming user's email is stored in the User model
+    const subject = "Order Confirmation";
+    const text = link;
+    sendEmail(userEmail, subject, text);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Internal server error" });
+  }
 });
 
 const resetPassword = asyncHandler(async (req, res) => {
-  const { id, token } = req.params;
-  console.log(req.params);
-
-  const user = await User.findById({ _id: id });
-
-  if (!user) {
-    return res
-      .status(COMMON_NOT_FOUND_CODE)
-      .json({ message: COM_NOT_FOUND_MESSAGE("user") });
-  }
-
   try {
-    const verify = jwt.verify(token);
-    res.render("index", { email: verify.email });
-    res.send("Verified");
-  } catch (error) {
-    res.send("Not Verified");
-  }
-});
-
-const updatePassword = asyncHandler(async (req, res) => {
-  const { id, token } = req.params;
-  const { password } = req.body;
-  console.log(req.params);
-
-  const user = await User.findById({ _id: id });
-
-  if (!user) {
-    return res
-      .status(COMMON_NOT_FOUND_CODE)
-      .json({ message: COM_NOT_FOUND_MESSAGE("user") });
-  }
-
-  try {
-    const verify = jwt.verify(token);
-
-    const encryptedPassword = await bcrypt.hash(password, 10);
-
-    await User.updateOne(
-      {
-        _id: id,
-      },
-      {
-        $set: {
-          password: encryptedPassword,
-        },
-      }
+    console.log(
+      req.params,
+      " -----------------------------------------------  "
     );
-    res.send("Verified");
-  } catch (error) {
-    res.send("Not Verified");
+    const { id } = req.params;
+    console.log(req.body, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ");
+    const { password } = req.body;
+    console.log(password, " !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    const resetToken = generateToken(id);
+    if (!resetToken) {
+      return res.status(400).json({ message: "Invalid or expired token" });
+    }
+    const user = await User.findById(id);
+    user.password = password;
+    await user.save();
+    // await resetToken.remove();
+    res.json({ message: "Password reset successfully" });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -683,5 +722,4 @@ export {
   getUserProfileByid,
   forgotPassword,
   resetPassword,
-  updatePassword
 };

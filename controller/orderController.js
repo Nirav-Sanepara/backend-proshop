@@ -1,24 +1,41 @@
 import asyncHandler from "express-async-handler";
+import nodemailer from "nodemailer"; // Import Nodemailer
 import Order from "../models/orderModel.js";
 import User from "../models/userModel.js";
 import Product from "../models/productModel.js";
-
 import {
   COMMON_NOT_FOUND_CODE,
-    COMMON_SUCCESS_GET_CODE,
-    COM_NOT_FOUND_MESSAGE,
-    COMMON_INT_SERVER_CODE,
-    COMMON_UPDATE_FAIL,
-    COM_SUCCESS_POST_MESSAGE,
-} from '../statusCodeResponse/index.js'
+  COMMON_SUCCESS_GET_CODE,
+  COM_NOT_FOUND_MESSAGE,
+} from '../statusCodeResponse/index.js';
 
-// @desc Create new order
-//@route POST /api/orders
-//@access Private
+// Create Nodemailer transporter
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'istra0802@gmail.com', // Replace with your Gmail email
+    pass: 'vdya hlyq cueu vkyb' // Replace with your Gmail password
+  }
+});
 
+// Send email function
+const sendEmail = async (email, subject, text) => {
+  try {
+    await transporter.sendMail({
+      from: 'istra0802@gmail.com', // Replace with your Gmail email
+      to: email,
+      subject: subject,
+      text: text
+    });
+    console.log('Email sent successfully');
+  } catch (error) {
+    console.error('Error sending email:', error);
+  }
+};
+
+// Add order items API
 const addOrderItems = asyncHandler(async (req, res) => {
- 
-  const userExists=await User.findById({_id:req.user?._id,})
+  const userExists = await User.findById(req.user?._id);
   const {
     cartItems,
     shippingAddress,
@@ -28,18 +45,13 @@ const addOrderItems = asyncHandler(async (req, res) => {
     shippingprice,
     totalPrice,
   } = req.body;
-  
-  const productData = await Product.findById(cartItems._id)
 
-  
   if (cartItems && cartItems.length === 0) {
     res.status(COMMON_NOT_FOUND_CODE);
     throw new Error("No order items");
-  } else if(userExists.isActive==true ) {
-   
+  } else if (userExists.isActive == true) {
     const order = new Order({
-      orderItems:cartItems,
-
+      orderItems: cartItems,
       user: req.user?._id,
       shippingAddress,
       paymentMethod,
@@ -48,14 +60,23 @@ const addOrderItems = asyncHandler(async (req, res) => {
       shippingprice,
       totalPrice,
     });
+
     const orderCreated = await order.save();
-   
+
+    // Send email notification
+    const userEmail = userExists.email; // Assuming user's email is stored in the User model
+    const subject = 'Order Confirmation';
+    const text = `Your order has been placed successfully. Order ID: ${orderCreated._id}`;
+    sendEmail(userEmail, subject, text);
+
     res.status(COMMON_SUCCESS_GET_CODE).json(orderCreated);
-  }
-  else{
-    res.json({message:"Something went wrong please try again later"});
+  } else {
+    res.json({ message: "Something went wrong, please try again later" });
   }
 });
+
+
+
 
 //@desc get order
 //@route GET /api/orders/:id
