@@ -26,16 +26,16 @@ import passport from "../controller/googleAuthController.js";
 
 const router = express.Router();
 // router.put('/',protect) 
-router.route("/").post(registerUserActive); /////////////////////////
-router.post("/login", authUser);    //////////////////////////////
+router.route("/").post(registerUserActive); 
+router.post("/login", authUser); 
  
-router.put('/:id',protect,userProfileSoftDelete) /////////////////////////////////
-router.get('/cartlist',protect,displayCartItems)  ////////////////////////////////////
+router.put('/:id',protect,userProfileSoftDelete) 
+router.get('/cartlist',protect,displayCartItems) 
 router.get('/favouritelist',protect,displayFavouriteItems)
-router.post('/addTocart',protect,addToCart) //////////////////////////////////
-router.post('/removecart',protect,removeFromCart) ///////////////////////////
-router.post('/addTofavourite',protect,favouriteItemAdd)/////////////////////////////
-router.post('/removeFav',protect,favouriteItemRemove) ///////////////////////////////
+router.post('/addTocart',protect,addToCart) 
+router.post('/removecart',protect,removeFromCart) 
+router.post('/addTofavourite',protect,favouriteItemAdd)
+router.post('/removeFav',protect,favouriteItemRemove) 
 router.post('/updateqty', updateCartItemQuantity)
 
 

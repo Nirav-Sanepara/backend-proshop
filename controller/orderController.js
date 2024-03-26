@@ -31,7 +31,7 @@ const addOrderItems = asyncHandler(async (req, res) => {
   const productData = await Product.findById(cartItems._id);
 
   
- console.log(req.body,'req body 99999999999999999999999999999999999999999999999999999999999')
+//  console.log(req.body,'req body 99999999999999999999999999999999999999999999999999999999999')
   if (cartItems && cartItems.length === 0) {
     res.status(COMMON_NOT_FOUND_CODE);
     throw new Error("No order items");

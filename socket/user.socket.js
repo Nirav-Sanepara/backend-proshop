@@ -2,9 +2,9 @@ export default function configureSocket(socket, io) {
     
     socket.on("broadcastUserAdd", async(data) =>
         {
-        console.log(data,'broad cast emittinggggggggggggggggggggggggggggggggggggg')
+         console.log('broadcast', data)
         const dataDet=socket.broadcast.emit("addUser", data);
-        console.log(dataDet,'900909090900909090909000000000000000000000000000000000000000000000000000000000000000')
+        console.log(dataDet,'is  emited',data)
         }
     );
     socket.on("broadcastUserUpdate", async (data) => {
