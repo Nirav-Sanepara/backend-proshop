@@ -2,9 +2,9 @@ export default function configureSocket(socket, io) {
     
     socket.on("broadcastUserAdd", async(data) =>
         {
-         console.log('broadcast', data)
+         console.log('broadcast===========================================================', data)
         const dataDet=socket.broadcast.emit("addUser", data);
-        console.log(dataDet,'is  emited',data)
+        console.log(dataDet,'is  emited===============================================================',data)
         }
     );
     socket.on("broadcastUserUpdate", async (data) => {
@@ -49,6 +49,6 @@ export default function configureSocket(socket, io) {
         }
     });
     socket.on('getUser',(data)=>{
-        console.log(data,'allUerGet data')
+        // console.log(data,'allUerGet data')
     })
 }

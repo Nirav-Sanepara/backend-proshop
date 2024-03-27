@@ -2,7 +2,7 @@ import http from "http";
 import { Server } from "socket.io";
 // import configureSocket from "../socket/user.socket.js";
 // Modify the export statement to accept 'app' as a parameter
-import mainSocketData from "../socket/index.js";
+// import mainSocketData from "../socket/index.js";
 import configureSocket from "../socket/user.socket.js";
 export default function createSocketServer(app) {
   const server = http.createServer(app);
