@@ -18,17 +18,14 @@ import {
   forgotPassword,
  resetPassword
 } from "../controller/userController.js";
-
-// import { forgotPassword, resetPassword, updatePassword } from "../controller/emailSend.js";
 import { protect } from "../middleware/authMiddleware.js";
 import passport from "../controller/googleAuthController.js";
-//import passport from "passport";
 
 const router = express.Router();
-// router.put('/',protect) 
+
 router.route("/").post(registerUserActive); 
 router.post("/login", authUser); 
- 
+ router.post('/addUser',registerUser);
 router.put('/:id',protect,userProfileSoftDelete) 
 router.get('/cartlist',protect,displayCartItems) 
 router.get('/favouritelist',protect,displayFavouriteItems)
@@ -37,8 +34,6 @@ router.post('/removecart',protect,removeFromCart)
 router.post('/addTofavourite',protect,favouriteItemAdd)
 router.post('/removeFav',protect,favouriteItemRemove) 
 router.post('/updateqty', updateCartItemQuantity)
-
-
 
 router.route("/").get(protect, allUserDataGetting) 
 

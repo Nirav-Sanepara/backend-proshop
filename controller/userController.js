@@ -3,8 +3,6 @@ import User from "../models/userModel.js";
 import generateToken from "../utils/generateToken.js";
 import Product from "../models/productModel.js";
 import yup, { string } from "yup";
-import passport from "passport";
-import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import createSocketServer from '../utils/socket.js'
 
 import {
@@ -54,7 +52,7 @@ const authUser = asyncHandler(async (req, res) => {
 //@access Public
 
 const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, role } = req.body;
 
   const userExists = await User.findOne({ email });
 
@@ -64,23 +62,19 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   //User.create() is similar as User.save()
-  else if (!userExists && userExists.isActive == false) {
+  else if (!userExists ) {
     const user = await User.create({
       name,
       email,
       password,
+      role,
       isActive: true,
     });
 
     if (user) {
-      const token = generateToken(user._id);
-
+      
       res.status(COMMON_SUCCESS_GET_CODE).json({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        token: generateToken(user._id),
+        user
       });
     } else {
       res.status(COMMON_UPDATE_FAIL);
