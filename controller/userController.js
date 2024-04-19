@@ -218,7 +218,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   const isValidate = yup.object({
     name: yup.string().min(1).required(),
     email: yup.string().email().required(),
-    password: yup.string().required(),
+    password: yup.string(),
    
   });
 
